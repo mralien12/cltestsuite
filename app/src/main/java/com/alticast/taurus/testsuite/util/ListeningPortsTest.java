@@ -1,3 +1,14 @@
+/*
+ *  Copyright (c) 2017 Alticast Corp.
+ *  All rights reserved. http://www.alticast.com/
+ *
+ *  This software is the confidential and proprietary information of
+ *  Alticast Corp. ("Confidential Information"). You shall not
+ *  disclose such Confidential Information and shall use it only in
+ *  accordance with the terms of the license agreement you entered into
+ *  with Alticast.
+ */
+
 package com.alticast.taurus.testsuite.util;
 
 import android.content.Context;
@@ -23,12 +34,14 @@ import java.util.regex.Pattern;
  * Created by hoa on 06/10/2017.
  */
 
-public class ListeningPortsTest extends AndroidTestCase{
+public class ListeningPortsTest extends AndroidTestCase {
     private static final String TAG = "ListeningPortsTest";
 
     private static final int CONN_TIMEOUT_IN_MS = 5000;
 
-    /** Ports that are allowed to be listening. */
+    /**
+     * Ports that are allowed to be listening.
+     */
     private static final List<String> EXCEPTION_PATTERNS = new ArrayList<String>(6);
 
     static {
@@ -51,7 +64,7 @@ public class ListeningPortsTest extends AndroidTestCase{
         //Example for when necessary: EXCEPTION_PATTERNS.add("0.0.0.0:5555 10000")
     }
 
-    public ListeningPortsTest(Context context)  {
+    public ListeningPortsTest(Context context) {
         this.setContext(context);
     }
 
@@ -95,12 +108,12 @@ public class ListeningPortsTest extends AndroidTestCase{
      * Locally accessible ports are often targeted by malicious locally
      * installed programs to gain unauthorized access to program data or
      * cause system corruption.
-     *
+     * <p>
      * In all cases, a local listening IP port can be replaced by a UNIX domain
      * socket. Unix domain sockets can be protected with unix filesystem
      * permission. Alternatively, you can use getsockopt(SO_PEERCRED) to
      * determine if a program is authorized to connect to your socket.
-     *
+     * <p>
      * Please convert loopback IP connections to unix domain sockets.
      */
     public void testNoListeningLoopbackTcpPorts() throws Exception {
@@ -111,12 +124,12 @@ public class ListeningPortsTest extends AndroidTestCase{
      * Locally accessible ports are often targeted by malicious locally
      * installed programs to gain unauthorized access to program data or
      * cause system corruption.
-     *
+     * <p>
      * In all cases, a local listening IP port can be replaced by a UNIX domain
      * socket. Unix domain sockets can be protected with unix filesystem
      * permission. Alternatively, you can use getsockopt(SO_PEERCRED) to
      * determine if a program is authorized to connect to your socket.
-     *
+     * <p>
      * Please convert loopback IP connections to unix domain sockets.
      */
     public void testNoListeningLoopbackTcp6Ports() throws Exception {
@@ -127,12 +140,12 @@ public class ListeningPortsTest extends AndroidTestCase{
      * Locally accessible ports are often targeted by malicious locally
      * installed programs to gain unauthorized access to program data or
      * cause system corruption.
-     *
+     * <p>
      * In all cases, a local listening IP port can be replaced by a UNIX domain
      * socket. Unix domain sockets can be protected with unix filesystem
      * permission.  Alternately, or you can use setsockopt(SO_PASSCRED) to
      * send credentials, and recvmsg to retrieve the passed credentials.
-     *
+     * <p>
      * Please convert loopback IP connections to unix domain sockets.
      */
     public void testNoListeningLoopbackUdpPorts() throws Exception {
@@ -143,12 +156,12 @@ public class ListeningPortsTest extends AndroidTestCase{
      * Locally accessible ports are often targeted by malicious locally
      * installed programs to gain unauthorized access to program data or
      * cause system corruption.
-     *
+     * <p>
      * In all cases, a local listening IP port can be replaced by a UNIX domain
      * socket. Unix domain sockets can be protected with unix filesystem
      * permission.  Alternately, or you can use setsockopt(SO_PASSCRED) to
      * send credentials, and recvmsg to retrieve the passed credentials.
-     *
+     * <p>
      * Please convert loopback IP connections to unix domain sockets.
      */
     public void testNoListeningLoopbackUdp6Ports() throws Exception {
@@ -181,7 +194,7 @@ public class ListeningPortsTest extends AndroidTestCase{
      * Remotely accessible ports (loopback==false) are often used by
      * attackers to gain unauthorized access to computers systems without
      * user knowledge or awareness.
-     *
+     * <p>
      * Locally accessible ports (loopback==true) are often targeted by
      * malicious locally installed programs to gain unauthorized access to
      * program data or cause system corruption.
@@ -346,14 +359,14 @@ public class ListeningPortsTest extends AndroidTestCase{
             byte[] retval = new byte[len / 2];
 
             for (int i = 0; i < len / 2; i += 4) {
-                retval[i] = (byte) ((Character.digit(s.charAt(2*i + 6), 16) << 4)
-                        + Character.digit(s.charAt(2*i + 7), 16));
-                retval[i + 1] = (byte) ((Character.digit(s.charAt(2*i + 4), 16) << 4)
-                        + Character.digit(s.charAt(2*i + 5), 16));
-                retval[i + 2] = (byte) ((Character.digit(s.charAt(2*i + 2), 16) << 4)
-                        + Character.digit(s.charAt(2*i + 3), 16));
-                retval[i + 3] = (byte) ((Character.digit(s.charAt(2*i), 16) << 4)
-                        + Character.digit(s.charAt(2*i + 1), 16));
+                retval[i] = (byte) ((Character.digit(s.charAt(2 * i + 6), 16) << 4)
+                        + Character.digit(s.charAt(2 * i + 7), 16));
+                retval[i + 1] = (byte) ((Character.digit(s.charAt(2 * i + 4), 16) << 4)
+                        + Character.digit(s.charAt(2 * i + 5), 16));
+                retval[i + 2] = (byte) ((Character.digit(s.charAt(2 * i + 2), 16) << 4)
+                        + Character.digit(s.charAt(2 * i + 3), 16));
+                retval[i + 3] = (byte) ((Character.digit(s.charAt(2 * i), 16) << 4)
+                        + Character.digit(s.charAt(2 * i + 1), 16));
             }
             return InetAddress.getByAddress(retval);
         }

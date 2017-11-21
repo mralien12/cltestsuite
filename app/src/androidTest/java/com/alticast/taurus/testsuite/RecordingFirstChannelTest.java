@@ -1,3 +1,14 @@
+/*
+ *  Copyright (c) 2017 Alticast Corp.
+ *  All rights reserved. http://www.alticast.com/
+ *
+ *  This software is the confidential and proprietary information of
+ *  Alticast Corp. ("Confidential Information"). You shall not
+ *  disclose such Confidential Information and shall use it only in
+ *  accordance with the terms of the license agreement you entered into
+ *  with Alticast.
+ */
+
 package com.alticast.taurus.testsuite;
 
 import android.support.test.runner.AndroidJUnit4;
@@ -46,7 +57,7 @@ public class RecordingFirstChannelTest {
     private boolean isTunedSuccess;
 
     @BeforeClass
-    public static void setUpClass(){
+    public static void setUpClass() {
         List<String> list = new ArrayList<String>();
 
         BufferedReader buf_reader = null;
@@ -75,14 +86,14 @@ public class RecordingFirstChannelTest {
             }
         }
 
-        if(list.size() > 0) {
+        if (list.size() > 0) {
             String dvr_storage_path = list.get(0);
             RecordingManager.getInstance().start(dvr_storage_path);
         }
     }
 
     @Test
-    public void recordingTest(){
+    public void recordingTest() {
         if (channels == null) {
             channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         }
@@ -160,7 +171,7 @@ public class RecordingFirstChannelTest {
     }
 
     @AfterClass
-    public static void tearDownClass(){
+    public static void tearDownClass() {
         RecordingManager.getInstance().stop();
     }
 }
