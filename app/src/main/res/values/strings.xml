@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TestSuit</string>
+    <string name="app_name">Taurus CL Test Suite</string>
     <string name="browse_title"><![CDATA[Videos by Your Company]]></string>
     <string name="related_movies">Related Videos</string>
     <string name="vertical_grid_title"><![CDATA[Vertical Video Grid]]></string>
