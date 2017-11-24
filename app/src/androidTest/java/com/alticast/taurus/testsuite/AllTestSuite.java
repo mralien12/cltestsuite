@@ -8,17 +8,23 @@
  *  accordance with the terms of the license agreement you entered into
  *  with Alticast.
  */
-package com.alticast.taurus.testsuite.suite;
 
+package com.alticast.taurus.testsuite;
+
+import com.alticast.taurus.testsuite.network.BlockingListeningPortTest;
 import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+/**
+ * Created by hoa on 01/11/2017.
+ */
+
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         RecordingFirstChannelTest.class,
+        BlockingListeningPortTest.class
 })
-
-public class DvrTestSuite {
+public class AllTestSuite {
 }

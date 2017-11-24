@@ -15,7 +15,6 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.alticast.taurus.testsuite.MainActivity;
-import com.alticast.taurus.testsuite.util.ListeningPortsTest;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;

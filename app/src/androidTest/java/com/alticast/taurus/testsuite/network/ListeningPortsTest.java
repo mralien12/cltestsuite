@@ -9,7 +9,7 @@
  *  with Alticast.
  */
 
-package com.alticast.taurus.testsuite.util;
+package com.alticast.taurus.testsuite.network;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
