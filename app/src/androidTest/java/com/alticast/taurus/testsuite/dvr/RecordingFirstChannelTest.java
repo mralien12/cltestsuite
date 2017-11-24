@@ -9,7 +9,7 @@
  *  with Alticast.
  */
 
-package com.alticast.taurus.testsuite;
+package com.alticast.taurus.testsuite.dvr;
 
 import android.support.test.runner.AndroidJUnit4;
 
