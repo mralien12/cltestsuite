@@ -11,22 +11,14 @@
 
 package com.alticast.taurus.testsuite;
 
-import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelTest;
 import com.alticast.taurus.testsuite.media.TunerTest;
-import com.alticast.taurus.testsuite.network.BlockingListeningPortTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-/**
- * Created by hoa on 01/11/2017.
- */
-
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        RecordingFirstChannelTest.class,
-        BlockingListeningPortTest.class,
         TunerTest.class
 })
-public class AllTestSuite {
+public class MediaTestSuite {
 }
