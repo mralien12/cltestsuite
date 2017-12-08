@@ -12,7 +12,6 @@
 package com.alticast.taurus.testsuite;
 
 import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelTest;
-import com.alticast.taurus.testsuite.mpeg.SectionFilterTest;
 import com.alticast.taurus.testsuite.network.BlockingListeningPortTest;
 
 import org.junit.runner.RunWith;
@@ -26,7 +25,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         RecordingFirstChannelTest.class,
         BlockingListeningPortTest.class,
-        SectionFilterTest.class
 })
 public class AllTestSuite {
 }
