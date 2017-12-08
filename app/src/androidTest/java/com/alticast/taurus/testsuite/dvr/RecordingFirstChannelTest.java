@@ -35,6 +35,7 @@ import af.dvr.Recording;
 import af.dvr.RecordingManager;
 import af.dvr.RecordingSession;
 import af.dvr.RecordingSessionCallback;
+import af.epg.Program;
 import af.resource.NoAvailableResourceException;
 import af.resource.ResourceClient;
 
@@ -54,7 +55,9 @@ public class RecordingFirstChannelTest {
     private Recording record;
     private String evtId = "0";
     private String programUri = "program://" + evtId;
-    private boolean isTunedSuccess;
+    private boolean isTunedSuccess = false;
+    private boolean isRecordingStarted = false;
+    private boolean isRecordingStopped = false;
 
     @BeforeClass
     public static void setUpClass() {
@@ -104,6 +107,7 @@ public class RecordingFirstChannelTest {
         /* Check the DVR storage */
         assertThat("Root path of DVR storage", RecordingManager.getInstance().getStoragePath(), is(notNullValue()));
 
+
         /* Create session for recording */
         recordingSession = RecordingManager.getInstance().createRecordingSession(new RecordingSessionCallback() {
             @Override
@@ -114,12 +118,16 @@ public class RecordingFirstChannelTest {
 
             @Override
             public void onRecordingStopped() {
+
                 TLog.i(this, "onRecordingStopped");
+                isRecordingStopped = true;
+
             }
 
             @Override
             public void onRecordingStarted(String s) {
                 TLog.i(this, "onRecordingStarted" + s);
+                isRecordingStarted = true;
             }
 
             @Override
@@ -157,7 +165,25 @@ public class RecordingFirstChannelTest {
         assertThat("Has the tune request been fulfill?", isTunedSuccess, is(true));
 
         /* Start recording */
-        record = recordingSession.startRecording(programUri);
+        Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
+
+        record = recordingSession.startRecording(programs[0].getProgramUri());
+
+        //record = recordingSession.startRecording(null); //it cann't be null
+
+        /*
+         * Didn't call onRecordingStarted Event
+         *
+         */
+        /*
+        try {
+            TimeUnit.MILLISECONDS.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertThat("Do Recording start?", isRecordingStarted, is(true));
+        */
 
         try {
             TimeUnit.SECONDS.sleep(10);
@@ -166,7 +192,19 @@ public class RecordingFirstChannelTest {
         }
 
         recordingSession.stopRecording();
+
+        try {
+            TimeUnit.MILLISECONDS.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertThat("Do Recording stop?", isRecordingStopped, is(true));
+
+        recordingSession.release();
+
         assertThat("Record is expected not null", record, is(notNullValue()));
+
         TLog.i(this, "Testcase completed");
     }
 
