@@ -45,9 +45,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(AndroidJUnit4.class)
 public class SectionFilterTest {
+
     private final static int NUMBER_OF_SECTION_FILTER = 1;
-    private final int STREAM_ID = 1019;     // ???
-    private final int TABLE_ID = 0x00;      // CAT table id
+    private final int PMT_PID = 0x13EC;
+    private final int PAT_TABLE_ID = 0x00;
+    private final int PMT_TABLE_ID = 0x02;
 
     private Channel[] channels;
     private Channel currentChannel;
@@ -57,7 +59,7 @@ public class SectionFilterTest {
         sectionFilterGroup = new SectionFilterGroup(NUMBER_OF_SECTION_FILTER);
     }
 
-    @Test(timeout = 300000)      // Set timeout for test to 5 minutes
+   @Test(timeout = 300000)      // Set timeout for test to 5 minutes
     public void sectionFilterTest(){
 
         if (channels == null) {
@@ -67,11 +69,10 @@ public class SectionFilterTest {
         assertThat("Length of channel list must be greater than 0", channels.length > 0);
         currentChannel = channels[0];
 
-
         TableSectionFilter tableSectionFilter = sectionFilterGroup.newTableSectionFilter();
 
         /* Set timeout for section filter to 10s */
-        //tableSectionFilter.setTimeOut(10000);
+        tableSectionFilter.setTimeOut(10000);
 
         SectionFilterListener myListener = new SectionFilterListener() {
             @Override
@@ -97,7 +98,7 @@ public class SectionFilterTest {
 
         try {
             TLog.i(this, "Set the parameters on the filter");
-            tableSectionFilter.startFiltering(null, STREAM_ID, TABLE_ID);
+            tableSectionFilter.startFiltering(null, PMT_PID, PMT_TABLE_ID);
         } catch (FilterResourceException e) {
             e.printStackTrace();
         } catch (ConnectionLostException e) {
