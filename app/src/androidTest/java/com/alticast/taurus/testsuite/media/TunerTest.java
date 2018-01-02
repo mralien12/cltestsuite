@@ -218,9 +218,17 @@ public class TunerTest {
         });
 
         onTuneEvent = false;
+
         try {
             tuner.tune(infoSat);
         } catch (NoAvailableResourceException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            TLog.i(this,"Wait for 2Sec!! ASync");
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
