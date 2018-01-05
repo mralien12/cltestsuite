@@ -64,6 +64,7 @@ public class SectionFilterTest {
     private static boolean onTuneEvent;
     private static Tuner singleTuner;
     private static int sourceId;
+    private boolean isSFSuccess;
 
     @BeforeClass
     public static void setUp(){
@@ -118,7 +119,7 @@ public class SectionFilterTest {
         assertThat("Is onTuningEvent() callback invoked?", onTuneEvent, is(true));
     }
 
-   @Test(timeout = 30000)      // Set timeout for test to 30 Sec
+   @Test
     public void sectionFilterTest(){
         TLog.i(this, "Start SF test 30 Sec" );
 
@@ -172,7 +173,9 @@ public class SectionFilterTest {
                         TLog.i(this, "FilteringInterruptedException");
                         e.printStackTrace();
                     }
+
                 }
+                isSFSuccess = true;
             }
         };
 
@@ -209,7 +212,13 @@ public class SectionFilterTest {
             e.printStackTrace();
         }
 
-        while (true);
+       /* Wait few miniseconds for section filtering */
+       try {
+           TimeUnit.MILLISECONDS.sleep(30000);
+       } catch (InterruptedException e) {
+           e.printStackTrace();
+       }
+       assertThat("Is section filter successful?", isSFSuccess, is(true));
     }
 
     @AfterClass
