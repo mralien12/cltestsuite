@@ -11,6 +11,7 @@
 
 package com.alticast.taurus.testsuite;
 
+import com.alticast.taurus.testsuite.media.MediaPlayerTest;
 import com.alticast.taurus.testsuite.media.TunerTest;
 
 import org.junit.runner.RunWith;
@@ -18,7 +19,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        TunerTest.class
+        TunerTest.class,
+        MediaPlayerTest.class,
 })
 public class MediaTestSuite {
 }
