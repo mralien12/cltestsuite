@@ -166,6 +166,7 @@ public class RecordingFirstChannelTest {
 
         /* Start recording */
         Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
+        assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
 
         record = recordingSession.startRecording(programs[0].getProgramUri());
 
