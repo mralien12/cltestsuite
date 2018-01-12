@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017 Alticast Corp.
+ *  Copyright (c) 2018 Alticast Corp.
  *  All rights reserved. http://www.alticast.com/
  *
  *  This software is the confidential and proprietary information of
@@ -12,23 +12,17 @@
 package com.alticast.taurus.testsuite;
 
 import com.alticast.taurus.testsuite.channelbuilder.ScanSateliteTest;
-import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelTest;
-import com.alticast.taurus.testsuite.media.TunerTest;
-import com.alticast.taurus.testsuite.network.BlockingListeningPortTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * Created by hoa on 01/11/2017.
+ * Created by tk.hoa on 1/11/18.
  */
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        ScanSateliteTest.class,
-        RecordingFirstChannelTest.class,
-        BlockingListeningPortTest.class,
-        TunerTest.class
+        ScanSateliteTest.class
 })
-public class AllTestSuite {
+public class ChannelBuilderTestSuite {
 }
