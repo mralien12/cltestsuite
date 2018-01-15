@@ -19,8 +19,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        TunerTest.class,
         MediaPlayerTest.class,
+        TunerTest.class,
 })
 public class MediaTestSuite {
 }

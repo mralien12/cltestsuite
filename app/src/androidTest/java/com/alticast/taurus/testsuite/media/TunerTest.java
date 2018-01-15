@@ -78,18 +78,15 @@ public class TunerTest {
             e.printStackTrace();
         }
 
-        /* Wait few miniseconds for invoking callback */
+        /* Wait few seconds for invoking callback */
         try {
-            TimeUnit.MILLISECONDS.sleep(100);
+            TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-
-        assertThat("Is onTuningEvent() callback invoked?", onTuneEvent, is(true));
-
-
         singleTuner.release();
+        assertThat("Is onTuningEvent() callback invoked?", onTuneEvent, is(true));
         TLog.i(this, "single tuner test is successful");
     }
 
@@ -131,19 +128,16 @@ public class TunerTest {
                 e.printStackTrace();
             }
 
-            /* Wait few miniseconds for invoking callback */
+            /* Wait few seconds for invoking callback */
             try {
-                TimeUnit.MILLISECONDS.sleep(100);
+                TimeUnit.MILLISECONDS.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
+            tuners[i].release();
             assertThat("Is onTuningEvent() callback for tuner " + Integer.toString(i) + " called?",
                     onTuneEvent, is(true));
-        }
-
-        for(int i = 0;i < maxOfChannel; i++){
-            tuners[i].release();
         }
 
         TLog.i(this, "multiple test is successful");
@@ -185,13 +179,13 @@ public class TunerTest {
         int onId = 0x1;
         int typeSat = TransponderInfoSat.TYPESAT_BS;
         boolean userAdded = false;
-        int tsSpec = TransponderInfoSat.SPEC_DVBS;
-        int modulation = TransponderInfoSat.MOUDLATION_QPSK;
-        int frequency = 10729;
-        int polarization = TransponderInfoSat.POLARIZATION_LEFT;
+        int tsSpec = TransponderInfoSat.SPEC_DVBS2;
+        int modulation = TransponderInfoSat.MOUDLATION_8PSK;
+        int frequency = 11362;
+        int polarization = TransponderInfoSat.POLARIZATION_HORIZONTAL;
         int symbolrate = 22000;
-        int coderate = TransponderInfoSat.CODERATE_AUTO;
-        int rolloff = TransponderInfoSat.ROLL_OFF_020;
+        int coderate = TransponderInfoSat.CODERATE_2_3;
+        int rolloff = TransponderInfoSat.ROLL_OFF_035;
 
         RSatTpInfo rSatTpInfo = new RSatTpInfo(tsId, netId, onId, typeSat, userAdded, tsSpec,
                 modulation, frequency, polarization, symbolrate, coderate, rolloff);
@@ -231,7 +225,8 @@ public class TunerTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        tuner.release();
         assertThat("Is tuner tuned successful?", onTuneEvent, is(true));
+
     }
 }
