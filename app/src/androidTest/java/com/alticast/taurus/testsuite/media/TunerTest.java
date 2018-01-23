@@ -16,6 +16,7 @@ import com.alticast.af.tpinfomanager.RSatTpInfo;
 import com.alticast.taurus.testsuite.util.TLog;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -173,6 +174,7 @@ public class TunerTest {
     }
 
     @Test
+    @Ignore
     public void transponderTunerTest(){
         int tsId = 0x3fb;
         int netId = 1;
