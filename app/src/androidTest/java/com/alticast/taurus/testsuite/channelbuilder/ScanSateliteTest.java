@@ -46,12 +46,10 @@ public class ScanSateliteTest{
     private static final int SYMBOL_RATE = 22000;
     private static final int POLARIZATION = 1;
 
-    private static RScanParam rScanParam;
-    private Channel[] channels;
-
     private boolean isScanSuccess;
     private boolean isSaveResultSuccess;
-    private static ScanEventListener eventListener;
+
+    private static RScanParam rScanParam;
 
     @BeforeClass
     public static void setUp(){
@@ -71,17 +69,19 @@ public class ScanSateliteTest{
     }
 
     @Test
-    public void startScanTest(){
+    public void scanSaveTest(){
+        Channel[] channels = null;
+
         ScanManager.getInstance().setEventListener(new ScanEventListener() {
             @Override
             public void notify(RScanEventObject rScanEventObject) {
-                TLog.i(this, "notifyScanEvent");
+                TLog.i(this, "scanSaveTest(): notifyScanEvent");
                 isScanSuccess = true;
             }
 
             @Override
             public void notifyScanSaveResultFinished() {
-                TLog.i(this, "notifyScanSaveResultFinished");
+                TLog.i(this, "scanSaveTest(): notifyScanSaveResultFinished");
                 isSaveResultSuccess = true;
             }
 
@@ -90,8 +90,65 @@ public class ScanSateliteTest{
 
             }
         });
+
         /* 1. Start scanning test */
-        assertThat("Start scanning", ScanManager.getInstance().startScan(rScanParam), is(true));
+            isScanSuccess = false;
+            assertThat("scanSaveTest(): Start scanning", ScanManager.getInstance().startScan(rScanParam), is(true));
+
+        /* Wait few seconds for scan progress */
+            try {
+                TimeUnit.SECONDS.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            assertThat("scanSaveTest(): Is startScan success?", isScanSuccess, is(true));
+
+        /* 2. Save result test */
+            assertThat("scanSaveTest(): Save scan result", ScanManager.getInstance().saveResult(), is(true));
+
+        /* Delay few miliseconds for save result notify callback */
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            assertThat("scanSaveTest(): Is save scan result success?", isSaveResultSuccess, is(true));
+
+        /* 3. Stop scanning test */
+            assertThat("scanSaveTest(): Stop scanning", ScanManager.getInstance().stopScan(), is(true));
+
+        /* 4. Check channel list */
+            channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
+
+        assertThat("scanSaveTest(): Is channel build success?", channels.length > 0);
+        TLog.i(this, "scanSaveTest() successfully");
+    }
+
+    @Test
+    public void pauseResumeTest(){
+        Channel[] channels = null;
+
+        ScanManager.getInstance().setEventListener(new ScanEventListener() {
+            @Override
+            public void notify(RScanEventObject rScanEventObject) {
+                TLog.i(this, "pauseResumeTest(): notifyScanEvent");
+                isScanSuccess = true;
+            }
+
+            @Override
+            public void notifyScanSaveResultFinished() {
+            }
+
+            @Override
+            public void selectConflictedChannelRegion(int i, RScanConflictRegion[] rScanConflictRegions) {
+
+            }
+        });
+
+        /* 1. Start scanning test */
+        isScanSuccess = false;
+        assertThat("pauseResumeTest(): Start scanning", ScanManager.getInstance().startScan(rScanParam), is(true));
 
         /* Wait few seconds for scan progress */
         try {
@@ -100,31 +157,69 @@ public class ScanSateliteTest{
             e.printStackTrace();
         }
 
-        assertThat("Is startScan success?", isScanSuccess, is(true));
+        assertThat("pauseResumeTest(): Is startScan success?", isScanSuccess, is(true));
 
-        /* 2. Save result test */
-        assertThat("Save scan result", ScanManager.getInstance().saveResult(), is(true));
+        /* 2. Pause scanning */
+        assertThat("pauseResumeTest(): Pause scanning", ScanManager.getInstance().pauseScan(), is(true));
 
-        /* Delay few miliseconds for save result notify callback */
+        /* Wait few seconds. And then resume scanning */
         try {
-            TimeUnit.MILLISECONDS.sleep(100);
+            TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertThat("Is save scan result success?", isSaveResultSuccess, is(true));
 
-        /* 3. Stop scanning test */
-        assertThat("Stop scanning", ScanManager.getInstance().stopScan(), is(true));
+        /* 3. Resume scanning */
+        assertThat("pauseResumeTest(): Resume Scanning", ScanManager.getInstance().resumeScan(), is(true));
 
-        /* 4. Check channel list */
+         /* 4. Stop scanning*/
+        assertThat("pauseResumeTest(): Stop scanning", ScanManager.getInstance().stopScan(), is(true));
+
+        /* 5. Check channel list */
         channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
-        assertThat("Is channel build success?", channels.length > 0);
+        assertThat("pauseResumeTest(): Is channel build success?", channels.length > 0);
+
+        TLog.i(this, "pauseResumeTest() successfully");
     }
 
-//    @Test
-//    public void pauseResumeTest(){
-//        assertThat(ScanManager.getInstance().pauseScan(), is(true));
-//        assertThat(ScanManager.getInstance().resumeScan(), is(true));
-//    }
+    @Test
+    public void pauseScanTest(){
+        ScanManager.getInstance().setEventListener(new ScanEventListener() {
+            @Override
+            public void notify(RScanEventObject rScanEventObject) {
+                TLog.i(this, "pauseScanTest(): notifyScanEvent");
+                isScanSuccess = true;
+            }
+
+            @Override
+            public void notifyScanSaveResultFinished() {
+            }
+
+            @Override
+            public void selectConflictedChannelRegion(int i, RScanConflictRegion[] rScanConflictRegions) {
+
+            }
+        });
+
+        /* 1. Pause scanning */
+        assertThat("pauseScanTest(): Pause scanning", ScanManager.getInstance().pauseScan(), is(true));
+
+        /* 2. Start scanning test */
+        isScanSuccess = false;
+        assertThat("pauseScanTest(): Start scanning", ScanManager.getInstance().startScan(rScanParam), is(true));
+
+        /* Wait few seconds for scan progress */
+        try {
+            TimeUnit.SECONDS.sleep(20);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertThat("pauseScanTest(): Scanning will fail while pausing. Is scanning success?", isScanSuccess, is(false));
+
+        /* 3. Resume scanning */
+        assertThat("pauseScanTest(): Resume Scanning", ScanManager.getInstance().resumeScan(), is(true));
+
+    }
 }
 
