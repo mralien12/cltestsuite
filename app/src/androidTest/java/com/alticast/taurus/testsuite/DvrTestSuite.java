@@ -10,14 +10,15 @@
  */
 package com.alticast.taurus.testsuite;
 
-import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelTest;
+
+import com.alticast.taurus.testsuite.dvr.RecordingMultiChannelTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        RecordingFirstChannelTest.class,
+        RecordingMultiChannelTest.class
 })
 
 public class DvrTestSuite {

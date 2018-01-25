@@ -48,9 +48,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 
 @RunWith(AndroidJUnit4.class)
-public class RecordingFirstChannelTest {
+public class RecordingMultiChannelTest {
     private Channel[] channels;
-    private Channel currentChannel;
+    private int channelTest = 0;
     private RecordingSession recordingSession;
     private Recording record;
     private String evtId = "0";
@@ -96,101 +96,86 @@ public class RecordingFirstChannelTest {
     }
 
     @Test
-    public void recordingTest() {
+    public void recordingMultiChannelTest() {
         if (channels == null) {
             channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         }
 
         assertThat("Length of channel list must be greater than 0", channels.length > 0);
-        currentChannel = channels[0];
+        TLog.i(this, "Total Channels: " + channels.length);
 
         /* Check the DVR storage */
         assertThat("Root path of DVR storage", RecordingManager.getInstance().getStoragePath(), is(notNullValue()));
 
+        do {
+            /* Create session for recording */
+            recordingSession = RecordingManager.getInstance().createRecordingSession(new RecordingSessionCallback() {
+                @Override
+                public void onError(short i) {
+                    isTunedSuccess = false;
+                    TLog.e(this, "onError");
+                }
 
-        /* Create session for recording */
-        recordingSession = RecordingManager.getInstance().createRecordingSession(new RecordingSessionCallback() {
-            @Override
-            public void onError(short i) {
-                isTunedSuccess = false;
-                TLog.e(this, "onError");
+                @Override
+                public void onRecordingStopped() {
+                    TLog.i(this, "onRecordingStopped");
+                    isRecordingStopped = true;
+                }
+
+                @Override
+                public void onRecordingStarted(String s) {
+                    TLog.i(this, "onRecordingStarted" + s);
+                    isRecordingStarted = true;
+                }
+
+                @Override
+                public void onTuned() {
+                    TLog.i(this, "onTuned");
+                    isTunedSuccess = true;
+                }
+            }, new ResourceClient() {
+                @Override
+                public String getName() {
+                    return null;
+                }
+
+                @Override
+                public String getDescription() {
+                    return null;
+                }
+            });
+
+            try {
+                recordingSession.tune(channels[channelTest].getUri());
+            } catch (NoAvailableResourceException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public void onRecordingStopped() {
-
-                TLog.i(this, "onRecordingStopped");
-                isRecordingStopped = true;
-
+            /* onTuned() callback function need some delay to execute.
+             * So we try to sleep 1-2 second(s).
+             */
+            try {
+                TimeUnit.MILLISECONDS.sleep(1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public void onRecordingStarted(String s) {
-                TLog.i(this, "onRecordingStarted" + s);
-                isRecordingStarted = true;
+            assertThat("Has the tune request been fulfill?", isTunedSuccess, is(true));
+
+            /* Start recording */
+            Program[] programs = channels[channelTest].getPrograms(1473531277634L, 1473552877634L);
+
+            assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
+
+            record = recordingSession.startRecording(programs[0].getProgramUri());
+
+            try {
+                TimeUnit.SECONDS.sleep(15);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            @Override
-            public void onTuned() {
-                TLog.i(this, "onTuned");
-                isTunedSuccess = true;
-            }
-        }, new ResourceClient() {
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public String getDescription() {
-                return null;
-            }
-        });
-
-        try {
-            recordingSession.tune(currentChannel.getUri());
-        } catch (NoAvailableResourceException e) {
-            e.printStackTrace();
-        }
-
-        /* onTuned() callback function need some delay to execute.
-         * So we try to sleep 1-2 second(s).
-         */
-        try {
-            TimeUnit.MILLISECONDS.sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        assertThat("Has the tune request been fulfill?", isTunedSuccess, is(true));
-
-        /* Start recording */
-        Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
-        assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
-
-        record = recordingSession.startRecording(programs[0].getProgramUri());
-
-        //record = recordingSession.startRecording(null); //it cann't be null
-
-        /*
-         * Didn't call onRecordingStarted Event
-         *
-         */
-        /*
-        try {
-            TimeUnit.MILLISECONDS.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        assertThat("Do Recording start?", isRecordingStarted, is(true));
-        */
-
-        try {
-            TimeUnit.SECONDS.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            channelTest++;
+        } while (channelTest < channels.length);
 
         recordingSession.stopRecording();
 

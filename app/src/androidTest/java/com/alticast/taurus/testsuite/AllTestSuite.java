@@ -12,7 +12,7 @@
 package com.alticast.taurus.testsuite;
 
 import com.alticast.taurus.testsuite.channelbuilder.ScanSateliteTest;
-import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelTest;
+import com.alticast.taurus.testsuite.dvr.RecordingMultiChannelTest;
 import com.alticast.taurus.testsuite.media.MediaPlayerTest;
 import com.alticast.taurus.testsuite.media.TunerTest;
 import com.alticast.taurus.testsuite.mpeg.SectionFilterTest;
@@ -31,9 +31,8 @@ import org.junit.runners.Suite;
         MediaPlayerTest.class,
         TunerTest.class,
         SectionFilterTest.class,
-        RecordingFirstChannelTest.class,
-        BlockingListeningPortTest.class,
-
+        RecordingMultiChannelTest.class,
+        BlockingListeningPortTest.class
 })
 public class AllTestSuite {
 }

@@ -13,7 +13,7 @@ package com.alticast.taurus.testsuite;
 
 import com.alticast.taurus.testsuite.channelbuilder.ScanSateliteTest;
 import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelMultiTimeTest;
-import com.alticast.taurus.testsuite.dvr.RecordingFirstChannelTest;
+import com.alticast.taurus.testsuite.dvr.RecordingMultiChannelTest;
 import com.alticast.taurus.testsuite.media.MediaPlayerTest;
 
 import org.junit.runner.RunWith;
@@ -23,8 +23,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         ScanSateliteTest.class,
         MediaPlayerTest.class,
-        RecordingFirstChannelTest.class,
-        RecordingFirstChannelMultiTimeTest.class
+        RecordingFirstChannelMultiTimeTest.class,
+        RecordingMultiChannelTest.class
 })
 
 public class RecordingTestSuite {
