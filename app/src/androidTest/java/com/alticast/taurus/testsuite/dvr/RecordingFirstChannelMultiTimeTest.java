@@ -55,6 +55,8 @@ public class RecordingFirstChannelMultiTimeTest {
     private boolean isTunedSuccess = false;
     private boolean isRecordingStopped = false;
     private boolean isRecordingStarted = false;
+    private boolean isRightTime = false;
+    private int timeChecking;
 
     @BeforeClass
     public static void setUpClass() {
@@ -97,6 +99,7 @@ public class RecordingFirstChannelMultiTimeTest {
         isTunedSuccess = false;
         isRecordingStopped = false;
         isRecordingStarted = false;
+        isRightTime = false;
 
         if (channels == null) {
             channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
@@ -167,6 +170,7 @@ public class RecordingFirstChannelMultiTimeTest {
 
     @Test
     public void recording030Second() {
+        timeChecking = 30;
         /* Start recording */
         Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
         assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
@@ -175,7 +179,7 @@ public class RecordingFirstChannelMultiTimeTest {
         TLog.i(this, "Start recording in 30 seconds, Channels number: "+ programs.length + " First Program duration: "+programs[0].getDuration());
 
         try {
-            TimeUnit.SECONDS.sleep(30);
+            TimeUnit.SECONDS.sleep(timeChecking);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -183,6 +187,7 @@ public class RecordingFirstChannelMultiTimeTest {
 
     @Test
     public void recording060Second() {
+        timeChecking = 60;
         /* Start recording */
         Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
         assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
@@ -191,7 +196,7 @@ public class RecordingFirstChannelMultiTimeTest {
         TLog.i(this, "Start recording in 60 seconds, Channels number: "+ programs.length + " First Program duration: "+programs[0].getDuration());
 
         try {
-            TimeUnit.SECONDS.sleep(60);
+            TimeUnit.SECONDS.sleep(timeChecking);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -200,6 +205,7 @@ public class RecordingFirstChannelMultiTimeTest {
     //@Ignore
     @Test
     public void recording120Second() {
+        timeChecking = 120;
         /* Start recording */
         Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
         assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
@@ -208,7 +214,7 @@ public class RecordingFirstChannelMultiTimeTest {
         TLog.i(this, "Start recording in 120 seconds, Channels number: "+ programs.length + " First Program duration: "+programs[0].getDuration());
 
         try {
-            TimeUnit.SECONDS.sleep(120);
+            TimeUnit.SECONDS.sleep(timeChecking);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -217,6 +223,7 @@ public class RecordingFirstChannelMultiTimeTest {
     //@Ignore
     @Test
     public void recording180Second() {
+        timeChecking = 180;
         /* Start recording */
         Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
         assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
@@ -225,7 +232,7 @@ public class RecordingFirstChannelMultiTimeTest {
         TLog.i(this, "Start recording in 180 seconds, Channels number: "+ programs.length + " First Program duration: "+programs[0].getDuration());
 
         try {
-            TimeUnit.SECONDS.sleep(180);
+            TimeUnit.SECONDS.sleep(timeChecking);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -235,14 +242,34 @@ public class RecordingFirstChannelMultiTimeTest {
     public void StopRecord() {
         recordingSession.stopRecording();
 
-        TLog.i(this, "Recording length: " + record.getDuration());
-
         try {
             TimeUnit.MILLISECONDS.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        switch (timeChecking){
+            case 30:
+                if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
+                    isRightTime = true;
+                break;
+            case 60:
+                if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
+                    isRightTime = true;
+                break;
+            case 120:
+                if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
+                    isRightTime = true;
+                break;
+            case 180:
+                if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
+                    isRightTime = true;
+                break;
+            default: isRightTime = false;
+        }
+
+        assertThat("Recording Time : " + record.getDuration()+" _ Expected Time : " + timeChecking, isRightTime, is(true));
+        TLog.i(this, "Recording length : " + record.getDuration());
         assertThat("Do Recording stop?", isRecordingStopped, is(true));
         recordingSession.release();
         assertThat("Record is expected not null", record, is(notNullValue()));
