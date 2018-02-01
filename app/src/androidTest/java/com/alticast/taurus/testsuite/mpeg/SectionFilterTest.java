@@ -65,6 +65,7 @@ public class SectionFilterTest {
     private static Tuner singleTuner;
     private static int sourceId;
     private boolean isSFSuccess;
+    private boolean isTimeoutEvent;
 
     @BeforeClass
     public static void setUp(){
@@ -76,6 +77,9 @@ public class SectionFilterTest {
             channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         }
 
+        if (channels.length <= 0) {
+            TLog.e("SetUp", "setUp() Channel list is empty. Please check channelbuilder test suite");
+        }
         assertThat("Length of channel list must be greater than 0", channels.length > 0);
         currentChannel = channels[0];
 
@@ -111,11 +115,14 @@ public class SectionFilterTest {
 
         /* Wait few miniseconds for invoking callback */
         try {
-            TimeUnit.MILLISECONDS.sleep(100);
+            TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        if (!onTuneEvent) {
+            TLog.e("SetUp" , "setUp() Tuning callback failed, please check tuner test case");
+        }
         assertThat("Is onTuningEvent() callback invoked?", onTuneEvent, is(true));
     }
 
@@ -173,7 +180,6 @@ public class SectionFilterTest {
                         TLog.i(this, "FilteringInterruptedException");
                         e.printStackTrace();
                     }
-
                 }
                 isSFSuccess = true;
             }
@@ -219,6 +225,70 @@ public class SectionFilterTest {
            e.printStackTrace();
        }
        assertThat("Is section filter successful?", isSFSuccess, is(true));
+    }
+
+    @Test
+    public void testTimeoutEvent(){
+        long timeout = 10000;
+        SectionFilterGroup sectionFilterGroup = new SectionFilterGroup(NUMBER_OF_SECTION_FILTER);
+        TableSectionFilter tableSectionFilter = sectionFilterGroup.newTableSectionFilter();
+        tableSectionFilter.setTimeOut(timeout);
+        SectionFilterListener sectionFilterListener = new SectionFilterListener() {
+            @Override
+            public void onSectionFilterEvent(SectionFilterEvent sectionFilterEvent) {
+                TLog.i(this, "testTimeoutEvent() [" + sectionFilterEvent + "]");
+                if (sectionFilterEvent instanceof TimeOutEvent){
+                    isTimeoutEvent = true;
+                }
+            }
+        };
+
+        tableSectionFilter.setSectionFilterListener(sectionFilterListener);
+        sectionFilterGroup.setSourceId(sourceId);
+
+        TLog.i(this, "testTimeoutEvent() start");
+        isTimeoutEvent = false;
+        try {
+            tableSectionFilter.startFiltering(null, PMT_PID, -1);
+        } catch (FilterResourceException e) {
+            e.printStackTrace();
+        } catch (ConnectionLostException e) {
+            e.printStackTrace();
+        } catch (IllegalFilterDefinitionException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            sectionFilterGroup.attach(currentChannel.getUri(), new ResourceClient() {
+                @Override
+                public String getName() {
+                    return null;
+                }
+
+                @Override
+                public String getDescription() {
+                    return null;
+                }
+            });
+        } catch (NoAvailableResourceException e) {
+            e.printStackTrace();
+        }
+
+        /* Wait few seconds for timeout event happens */
+        try {
+            TimeUnit.MILLISECONDS.sleep(timeout + 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (!isTimeoutEvent) {
+            TLog.e(this, "testTimeoutEvent() failed");
+        } else {
+            TLog.i(this, "testTimeoutEvent() success");
+        }
+        assertThat("Does timeout event happen?", isTimeoutEvent, is(true));
+        sectionFilterGroup.detach();
+
     }
 
     @AfterClass
