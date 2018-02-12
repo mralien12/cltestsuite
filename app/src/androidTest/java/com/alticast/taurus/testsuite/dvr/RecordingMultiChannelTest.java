@@ -163,7 +163,7 @@ public class RecordingMultiChannelTest {
             assertThat("Has the tune request been fulfill?", isTunedSuccess, is(true));
 
             /* Start recording */
-            Program[] programs = channels[channelTest].getPrograms(1473531277634L, 1473552877634L);
+            Program[] programs = channels[channelTest].getPrograms(1376226000000L, 1376233800000L);
 
             assertThat("Programs must be greater than 0!! please check MediaPlayerTest", programs.length > 0);
 

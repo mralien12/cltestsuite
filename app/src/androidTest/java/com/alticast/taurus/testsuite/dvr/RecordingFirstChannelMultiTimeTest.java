@@ -239,7 +239,7 @@ public class RecordingFirstChannelMultiTimeTest {
     }
 
     @After
-    public void StopRecord() {
+    public void stopRecord() {
         recordingSession.stopRecording();
 
         try {
