@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">AndroidTVTestApp</string>
+    <string name="scan_step1">Select \"SCAN\" button and verify that channel list show up </string>
+    <string name="scan_step2">Select \"SAVE\" button to save channel list into database</string>
+    <string-array name="list_of_test_case">
+        <item>Scan Test</item>
+        <item>Tuner Test</item>
+        <item>Section Filter Test</item>
+        <item>Recording Test</item>
+        <item>Blocking Port Test</item>
+    </string-array>
+</resources>
