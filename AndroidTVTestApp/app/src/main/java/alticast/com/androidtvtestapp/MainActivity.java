@@ -15,6 +15,7 @@
 package alticast.com.androidtvtestapp;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,11 +33,15 @@ import android.widget.Toast;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /*
  * MainActivity class that loads {@link MainFragment}.
@@ -46,7 +51,6 @@ public class MainActivity extends Activity {
 
     private ListView lsvTest;
     private int numOfPassTC, numOfFailTC;
-    private int numOfTestedTC = 2;
 
     private List<TestCase> listTestedTC;
 
@@ -72,6 +76,7 @@ public class MainActivity extends Activity {
         }
 
         listTestedTC = new ArrayList<TestCase>();
+        btnExport.performClick();
     }
 
     @Override
@@ -84,7 +89,6 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         TestCase testCase = new TestCase();
         if (requestCode == TestCase.SCAN_TEST) {
-            numOfTestedTC++;
             if (resultCode == RESULT_OK) {
                 boolean isSuccess = data.getBooleanExtra(TestCase.TEST_RESULT, false);
                 if (isSuccess) {
@@ -123,10 +127,11 @@ public class MainActivity extends Activity {
     private class btnExportOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            File newXmlFile = new File("/storage/emulated/0/androidtvtest.xml");
-            if (!newXmlFile.exists()) {
+            File resultXmlFile = new File("/storage/emulated/0/androidtvtest.xml");
+
+            if (!resultXmlFile.exists()) {
                 try {
-                    newXmlFile.createNewFile();
+                    resultXmlFile.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -134,7 +139,7 @@ public class MainActivity extends Activity {
 
             FileOutputStream fileOutputStream = null;
             try {
-                fileOutputStream = new FileOutputStream(newXmlFile);
+                fileOutputStream = new FileOutputStream(resultXmlFile);
             } catch (FileNotFoundException e) {
                 TLog.e(this, e.toString());
             }
@@ -143,8 +148,9 @@ public class MainActivity extends Activity {
 
             try {
                 xmlSerializer.setOutput(fileOutputStream, "UTF-8");
-                xmlSerializer.startDocument(null, Boolean.valueOf(false));
+                xmlSerializer.startDocument(null, false);
                 xmlSerializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+                xmlSerializer.processingInstruction("xml-stylesheet type=\"text/xsl\" href=\"compatibility_result.xsl\"");
                 xmlSerializer.startTag(null, "Result");
                 xmlSerializer.attribute(null, "suite_name", "TCTS_VERIFIER");
                 xmlSerializer.attribute(null, "report_version", "1.0");
@@ -159,14 +165,14 @@ public class MainActivity extends Activity {
                 xmlSerializer.startTag(null, "TestCase");
                 for (int i = 0; i < listTestedTC.size(); i++) {
                     TestCase tc = listTestedTC.get(i);
-                    if(tc.getTestResult()) {
+                    if (tc.getTestResult()) {
                         numOfPassTC++;
                     } else {
                         numOfFailTC++;
                     }
                     xmlSerializer.startTag(null, "Test");
                     xmlSerializer.attribute(null, "result",
-                            tc.getTestResult()?"pass":"fail");
+                            tc.getTestResult() ? "pass" : "fail");
                     xmlSerializer.attribute(null, "name", tc.getName());
                     xmlSerializer.endTag(null, "Test");
                 }
@@ -182,12 +188,68 @@ public class MainActivity extends Activity {
                 xmlSerializer.endTag(null, "Result");
                 xmlSerializer.endDocument();
                 xmlSerializer.flush();
+                fileOutputStream.close();
             } catch (IOException e) {
                 TLog.e(this, e.toString());
             }
 
-            Toast.makeText(getApplicationContext(), "Result saved in " + newXmlFile.getPath(),
-                    Toast.LENGTH_SHORT).show();
+            try {
+                File result_zip_file = new File("/storage/emulated/0/test_result.zip"); //TODO Add date time in filename
+                FileOutputStream fos = new FileOutputStream(result_zip_file);
+                ZipOutputStream zos = new ZipOutputStream(fos);
+
+                /* Firstly, zip xml file */
+                InputStream fisResultXml = new FileInputStream(resultXmlFile);
+                zipFile(fisResultXml, "androidtvtest.xml", zos);
+                fisResultXml.close();
+
+                /* Secondly, zip logo.png */
+                @SuppressLint("ResourceType")
+                InputStream isLogoPng = getResources().openRawResource(R.drawable.logo);
+                zipFile(isLogoPng, "logo.png", zos);
+                isLogoPng.close();
+
+                /* Thirdly, zip css file */
+                InputStream isCssFile = getAssets().open("compatibility_result.css");
+                zipFile(isCssFile, "compatibility_result.css", zos);
+                isCssFile.close();
+
+                /* Fourthly, zip xsd file */
+                InputStream isXsdFile = getAssets().open("compatibility_result.xsd");
+                zipFile(isXsdFile, "compatibility_result.xsd", zos);
+                isXsdFile.close();
+
+                /* Fifthly, zip xsl file */
+                InputStream isXslFile = getAssets().open("compatibility_result.xsl");
+                zipFile(isXslFile, "compatibility_result.xsl", zos);
+                isXslFile.close();
+
+                zos.closeEntry();
+                zos.close();
+                fos.close();
+                resultXmlFile.delete();
+
+                Toast.makeText(getApplicationContext(), "Result saved in " + result_zip_file.getPath(),
+                        Toast.LENGTH_SHORT).show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private void zipFile(InputStream inputStream, String file_name, ZipOutputStream zos) {
+        byte buf[] = new byte[1024];
+        int len;
+        ZipEntry ze = new ZipEntry(file_name);
+        try {
+            zos.putNextEntry(ze);
+            while ((len = inputStream.read(buf)) > 0) {
+                zos.write(buf, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
