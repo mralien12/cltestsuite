@@ -38,6 +38,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -53,6 +54,7 @@ public class MainActivity extends Activity {
     private int numOfPassTC, numOfFailTC;
 
     private List<TestCase> listTestedTC;
+    private Button btnXmlResult;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,8 @@ public class MainActivity extends Activity {
 
         Button btnExport = findViewById(R.id.btnExport);
         btnExport.setOnClickListener(new btnExportOnClickListener());
+        btnXmlResult = findViewById(R.id.btnViewXml);
+        btnXmlResult.setOnClickListener(new btnXmlResultOnClickListener());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -76,7 +80,6 @@ public class MainActivity extends Activity {
         }
 
         listTestedTC = new ArrayList<TestCase>();
-        btnExport.performClick();
     }
 
     @Override
@@ -89,6 +92,18 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         TestCase testCase = new TestCase();
         if (requestCode == TestCase.SCAN_TEST) {
+            if (resultCode == RESULT_OK) {
+                boolean isSuccess = data.getBooleanExtra(TestCase.TEST_RESULT, false);
+                if (isSuccess) {
+                    testCase.setTestResult(true);
+                    lsvTest.getChildAt(requestCode).setBackground(getResources().getDrawable(R.drawable.success_row_background));
+                } else {
+                    testCase.setTestResult(false);
+                    lsvTest.getChildAt(requestCode).setBackground(getResources().getDrawable(R.drawable.fail_row_background));
+                }
+                testCase.setName(data.getStringExtra(TestCase.TC_NAME));
+            }
+        }else if (requestCode == TestCase.RECORDING_TEST){
             if (resultCode == RESULT_OK) {
                 boolean isSuccess = data.getBooleanExtra(TestCase.TEST_RESULT, false);
                 if (isSuccess) {
@@ -115,6 +130,8 @@ public class MainActivity extends Activity {
                     startActivityForResult(intent, TestCase.SCAN_TEST);
                     break;
                 case TestCase.RECORDING_TEST:
+                    intent = new Intent(getApplication(), RecordingActivity.class);
+                    startActivityForResult(intent, TestCase.RECORDING_TEST);
                     break;
                 case TestCase.BLOCKING_PORT_TEST:
                     break;
@@ -236,6 +253,15 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
 
+        }
+    }
+
+    private class btnXmlResultOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(MainActivity.this, XmlResults.class);
+            intent.putExtra("TestCaseList", (Serializable) listTestedTC);
+            startActivity(intent);
         }
     }
 

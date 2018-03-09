@@ -1,5 +1,7 @@
 package alticast.com.androidtvtestapp;
 
+import java.io.Serializable;
+
 /*
  *  Copyright (c) 2018 Alticast Corp.
  *  All rights reserved. http://www.alticast.com/
@@ -10,7 +12,7 @@ package alticast.com.androidtvtestapp;
  *  accordance with the terms of the license agreement you entered into
  *  with Alticast.
  */
-public class TestCase {
+public class TestCase implements Serializable {
     public static final int SCAN_TEST = 0;
     public static final int TUNER_TEST = 1;
     public static final int SECTION_FILTER_TEST = 2;

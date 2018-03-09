@@ -35,6 +35,7 @@
         </activity>
         <activity android:name=".RecordingActivity" />
         <activity android:name=".ScanActivity" />
+        <activity android:name=".XmlResults" />
     </application>
 
 </manifest>

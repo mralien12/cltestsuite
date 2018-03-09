@@ -28,7 +28,15 @@
                 android:orientation="horizontal"
                 android:gravity="right">
                 <Button
+                    android:id="@+id/btnViewXml"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="View Results"
+                    />
+                <Button
                     android:id="@+id/btnExport"
+                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:text="Export..."
