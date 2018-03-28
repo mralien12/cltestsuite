@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -183,7 +184,6 @@ public class RecordingActivity extends Activity {
                         }
                     } else {
                         btn_true = false;
-                        Log.e("HAI", "+RecordingManager.getInstance().getStoragePath()");
                         toast = Toast.makeText(RecordingActivity.this, "FAIL: Do not have root path of DVR storage", Toast.LENGTH_SHORT);
                         toast.show();
                     }
@@ -263,5 +263,159 @@ public class RecordingActivity extends Activity {
                 finish();
             }
         });
+    }
+
+    // Return result
+    public boolean RecordingResult() {
+        btn_true = true;
+
+        List<String> list = new ArrayList<String>();
+        BufferedReader buf_reader = null;
+        try {
+            buf_reader = new BufferedReader(new FileReader("/proc/mounts"));
+            String line;
+
+            while ((line = buf_reader.readLine()) != null) {
+                if (line.contains("/mnt/media_rw") || line.contains("/mnt/expand")) {
+                    StringTokenizer tokens = new StringTokenizer(line, " ");
+                    String unused = tokens.nextToken(); // device
+                    String mount_point = tokens.nextToken(); // mount point/
+                    list.add(mount_point + "/");
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            btn_true = false;
+            ex.printStackTrace();
+            toast = Toast.makeText(RecordingActivity.this, "FAIL: File Not Found Exception", Toast.LENGTH_SHORT);
+            toast.show();
+        } catch (IOException ex) {
+            btn_true = false;
+            ex.printStackTrace();
+            toast = Toast.makeText(RecordingActivity.this, "FAIL: IO Exception", Toast.LENGTH_SHORT);
+            toast.show();
+        } finally {
+            if (buf_reader != null) {
+                try {
+                    buf_reader.close();
+                } catch (IOException ex) {
+                    btn_true = false;
+                    toast = Toast.makeText(RecordingActivity.this, "FAIL: IO Exception", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+        }
+
+        if (list.size() > 0) {
+            String dvr_storage_path = list.get(0);
+            RecordingManager.getInstance().start(dvr_storage_path);
+        }
+
+        /////
+        isTunedSuccess = false;
+        isRecordingStopped = false;
+        isRecordingStarted = false;
+        isRightTime = false;
+
+        if (channels == null) {
+            channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
+        }
+
+        if (channels.length > 0) {
+            currentChannel = channels[0];
+            if (RecordingManager.getInstance().getStoragePath() != null) {
+                RecordingManager.getInstance().start("");
+
+                recordingSession = RecordingManager.getInstance().createRecordingSession(new RecordingSessionCallback() {
+                    @Override
+                    public void onError(short i) {
+                        isTunedSuccess = false;
+                    }
+
+                    @Override
+                    public void onRecordingStopped() {
+                        isRecordingStopped = true;
+                    }
+
+                    @Override
+                    public void onRecordingStarted(String s) {
+                        isRecordingStarted = true;
+                    }
+
+                    @Override
+                    public void onTuned() {
+                        isTunedSuccess = true;
+                    }
+                }, new ResourceClient() {
+                    @Override
+                    public String getName() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return null;
+                    }
+                });
+
+                try {
+                    recordingSession.tune(currentChannel.getUri());
+                } catch (NoAvailableResourceException e) {
+                    btn_true = false;
+                    e.printStackTrace();
+                    toast = Toast.makeText(RecordingActivity.this, "FAIL: No Available Resource Exception", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+
+                try {
+                    TimeUnit.MILLISECONDS.sleep(2000);
+                } catch (InterruptedException e) {
+                    btn_true = false;
+                    e.printStackTrace();
+                    toast = Toast.makeText(RecordingActivity.this, "FAIL: Interrupted Exception", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            } else {
+                btn_true = false;
+                Log.e("HAI", "+RecordingManager.getInstance().getStoragePath()");
+                toast = Toast.makeText(RecordingActivity.this, "FAIL: Do not have root path of DVR storage", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        } else {
+            btn_true = false;
+//            toast = Toast.makeText(RecordingActivity.this, "FAIL: No Channel", Toast.LENGTH_SHORT);
+//            toast.show();
+        }
+
+        ////
+        timeChecking = 10;
+
+        Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
+        if (programs.length > 0) {
+            record = recordingSession.startRecording(programs[0].getProgramUri());
+            try {
+                TimeUnit.SECONDS.sleep(timeChecking);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                toast = Toast.makeText(RecordingActivity.this, "Interrupted Exception", Toast.LENGTH_SHORT);
+                toast.show();
+                btn_true = false;
+            }
+
+            recordingSession.stopRecording();
+            if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
+                isRightTime = true;
+            if (!isRightTime) {
+                btn_true = false;
+            }
+
+            recordingSession.release();
+            RecordingManager.getInstance().stop();
+        } else {
+            toast = Toast.makeText(RecordingActivity.this, "Programs must be greater than 0!", Toast.LENGTH_SHORT);
+            toast.show();
+            btn_true = false;
+        }
+
+        return btn_true;
     }
 }

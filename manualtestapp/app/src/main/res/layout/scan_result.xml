@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="alticast.com.androidtvtestapp.ScanActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background_black"
+            android:text="Can You See Channel Listing?"
+            android:textColor="@color/textcolor_white"
+            android:textSize="@dimen/lb_browse_header_text_size" />
+
+        <ProgressBar
+            android:id="@+id/pgbScan"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ListView
+            android:id="@+id/lsvChannel"
+            android:layout_width="match_parent"
+            android:layout_height="200sp"
+            android:background="@color/lb_default_brand_color"
+            android:clickable="false">
+
+        </ListView>
+        <include layout="@layout/footer_success_fail" />
+    </LinearLayout>
+</RelativeLayout>

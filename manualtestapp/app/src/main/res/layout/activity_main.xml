@@ -13,6 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -22,18 +23,36 @@
                 android:textSize="@dimen/lb_browse_header_text_size"
                 android:layout_gravity="start"/>
 
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="right">
+
+                <Button
+                    android:id="@+id/btnStart"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Start"
+                    />
+
                 <Button
                     android:id="@+id/btnViewXml"
                     android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="View Results"
+                    android:text="Results"
                     />
+
                 <Button
                     android:id="@+id/btnExport"
                     android:layout_weight="1"

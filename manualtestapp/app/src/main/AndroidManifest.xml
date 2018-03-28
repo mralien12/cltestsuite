@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".RecordingActivity" />
-        <activity android:name=".ScanActivity" />
+        <activity android:name=".ScanActivity" android:theme="@style/AppTheme.CustomTheme"/>
         <activity android:name=".XmlResults" />
     </application>
 

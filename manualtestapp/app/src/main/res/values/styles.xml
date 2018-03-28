@@ -2,4 +2,7 @@
 <resources>
 
     <style name="AppTheme" parent="@style/Theme.Leanback"></style>
+    <style name="AppTheme.CustomTheme">
+        <item name = "android:windowIsTranslucent">true</item>
+    </style>
 </resources>

@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -54,7 +55,9 @@ public class MainActivity extends Activity {
     private int numOfPassTC, numOfFailTC;
 
     private List<TestCase> listTestedTC;
-    private Button btnXmlResult;
+    private Button btnXmlResult, btnStart;
+    boolean result;
+    private ProgressBar progressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,11 @@ public class MainActivity extends Activity {
         btnExport.setOnClickListener(new btnExportOnClickListener());
         btnXmlResult = findViewById(R.id.btnViewXml);
         btnXmlResult.setOnClickListener(new btnXmlResultOnClickListener());
+
+        btnStart = findViewById(R.id.btnStart);
+        btnStart.setOnClickListener(new btnStartOnClickListener());
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -276,6 +284,40 @@ public class MainActivity extends Activity {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private class btnStartOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+
+            int testcase = 0;
+            while (testcase < 3)
+            {
+                Intent intent;
+                switch (testcase) {
+                    case 0:
+                        intent = new Intent(getApplication(), ScanActivity.class);
+                        startActivityForResult(intent, TestCase.SCAN_TEST);
+                        break;
+                    case 1:
+                        result = new RecordingActivity().RecordingResult();
+                        if (result)
+                        {
+                            lsvTest.getChildAt(TestCase.RECORDING_TEST).setBackground(getResources().getDrawable(R.drawable.success_row_background));
+                            //progressBar.setVisibility(View.INVISIBLE);
+                        }else{
+                            lsvTest.getChildAt(TestCase.RECORDING_TEST).setBackground(getResources().getDrawable(R.drawable.fail_row_background));
+                            //progressBar.setVisibility(View.INVISIBLE);
+                        }
+                        break;
+                    default:
+                        Toast toast = Toast.makeText(MainActivity.this, "END TEST", Toast.LENGTH_SHORT);
+                        toast.show();
+                        break;
+                }
+                testcase++;
+            }
         }
     }
 }

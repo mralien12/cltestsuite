@@ -3,6 +3,7 @@ package alticast.com.androidtvtestapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -49,28 +50,48 @@ public class ScanActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scan);
+//        setContentView(R.layout.activity_scan);
+        setContentView(R.layout.scan_result);
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
 
-        btnScan = (Button) findViewById(R.id.btnScan);
-        btnScan.setOnClickListener(new btnScanOnClickListener());
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
+        getWindow().setLayout((int) (width*0.6),(int) (height*0.6));
 
         pgbScan = (ProgressBar) findViewById(R.id.pgbScan);
         lsvChannel = (ListView) findViewById(R.id.lsvChannel);
-        btnSave = (Button) findViewById(R.id.btnSave);
-        btnSave.setEnabled(false);
-        btnSave.setOnClickListener(new btnSaveOnClickListener());
 
-        btnSuccess = (ImageButton) findViewById(R.id.btnSuccess);
+        btnSuccess = findViewById(R.id.btnSuccess);
         btnSuccess.setEnabled(false);
         btnSuccess.setOnClickListener(new btnSuccessOnClickListener());
 
-        btnFail = (ImageButton) findViewById(R.id.btnFail);
+        btnFail = findViewById(R.id.btnFail);
+        btnFail.setEnabled(false);
         btnFail.setOnClickListener(new btnFailOnClickListener());
 
-        btnHelp = findViewById(R.id.btnHelp);
-        btnHelp.setOnClickListener(new btnHelpOnClickListener());
+        ScanResult ();
 
-        TestcaseName = this.getClass().getName();
+//        btnScan = (Button) findViewById(R.id.btnScan);
+//        btnScan.setOnClickListener(new btnScanOnClickListener());
+//
+//        pgbScan = (ProgressBar) findViewById(R.id.pgbScan);
+//        lsvChannel = (ListView) findViewById(R.id.lsvChannel);
+//        btnSave = (Button) findViewById(R.id.btnSave);
+//        btnSave.setEnabled(false);
+//        btnSave.setOnClickListener(new btnSaveOnClickListener());
+//
+//        btnSuccess = (ImageButton) findViewById(R.id.btnSuccess);
+//        btnSuccess.setEnabled(false);
+//        btnSuccess.setOnClickListener(new btnSuccessOnClickListener());
+//
+//        btnFail = (ImageButton) findViewById(R.id.btnFail);
+//        btnFail.setOnClickListener(new btnFailOnClickListener());
+//
+//        btnHelp = findViewById(R.id.btnHelp);
+//        btnHelp.setOnClickListener(new btnHelpOnClickListener());
+//
+//        TestcaseName = this.getClass().getName();
     }
 
     private RScanParam generateParam(String satName, int lnb_freq, int transponder_freq){
@@ -155,7 +176,7 @@ public class ScanActivity extends Activity {
                     public void run() {
                         lsvChannel.setAdapter(channel_adapter);
                         if (channel_name.length >0) {
-                            btnSave.setEnabled(true);
+                           // btnSave.setEnabled(true);
                         }
                     }
                 });
@@ -217,6 +238,21 @@ public class ScanActivity extends Activity {
             Toast.makeText(getApplicationContext(), "This button will show detail about test case",
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+    ///
+    private boolean ScanResult (){
+        boolean result = true;
+
+        RScanParam rScanParam  = null;
+        rScanParam = generateParam(SAT_NAME, LNB_FREQ, FREQ);
+        scanSatellite(rScanParam);
+
+        ret = ScanManager.getInstance().saveResult();
+        btnSuccess.setEnabled(true);
+        btnFail.setEnabled(true);
+
+        return result;
     }
 }
 
