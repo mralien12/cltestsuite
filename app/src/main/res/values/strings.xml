@@ -1,3 +1,57 @@
 <resources>
-    <string name="app_name">cltestsuite</string>
+    <string name="app_name">TestApp</string>
+    <string name="scan_step1">Select \"SCAN\" button and verify that channels are display in the list </string>
+    <string name="scan_step2">Select \"SAVE\" button to save channel list into database</string>
+    <string-array name="list_of_test_case">
+        <item>Scan Test</item>
+        <item>Tuner Test</item>
+        <item>Section Filter Test</item>
+        <item>Recording Test</item>
+        <item>Blocking Port Test</item>
+    </string-array>
+
+    <string name="header">TCTS - Taurus CL Test Suite</string>
+    <string name="btn_test_all">Test All</string>
+    <string name="btn_show_result">Show Result</string>
+    <string name="btn_export_result">Export Result</string>
+    <string name="scan_test">Scan Test</string>
+    <string name="channel_test">Channel List Test</string>
+    <string name="dvr_test">DVR Test</string>
+    <string name="epg_test">EPG Test</string>
+    <string name="media_test">Media Test</string>
+    <string name="sf_test">Section Filter Test</string>
+
+    <string-array name="lvScanTest">
+        <item>1.ScanEventListener.Notify</item>
+        <item>2.ScanEventListener.notifyScanSaveResultFinished</item>
+        <item>3.ScanEventListener.selectConflictedChannelRegion</item>
+    </string-array>
+
+    <string-array name="lvChannelTest">
+        <item>1.ChannelListUpdateListener.onChannelListUpdated</item>
+        <item>2.ChannelsCallback.onChannelDataReceived</item>
+    </string-array>
+
+    <string-array name="lvDVRTest">
+        <item>1.RecordingsCallback.onRecordingReceived</item>
+        <item>2.RecordingManager.StateListener.onStated</item>
+        <item>3.RecordingManager.StateListener.onStopped</item>
+        <item>4.RecordingSession.RecordingSessionCallback</item>
+    </string-array>
+
+    <string-array name="lvEPGTest">
+    </string-array>
+
+    <string-array name="lvMediaTest">
+        <item>1.ChannelPlayer </item>
+        <item>2.ChannelEventListener.onChannelEvent</item>
+        <item>3.MediaPlayer</item>
+        <item>4.MediaEventListener</item>
+        <item>5.CaptionControllerEventListener.onDetatch</item>
+    </string-array>
+
+    <string-array name="lvSFTest">
+        <item>1.SectionFilterException</item>
+        <item>2.SectionFilterEvent</item>
+    </string-array>
 </resources>
