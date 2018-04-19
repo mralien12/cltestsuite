@@ -21,7 +21,8 @@
     <string name="media_test">Media Test</string>
     <string name="sf_test">Section Filter Test</string>
 
-    <string-array name="lvScanTest">
+    <!--When you add a new test case, please add a corresponding final variable in ScanTest.java-->
+    <string-array name="scan_test_list">
         <item>1.ScanEventListener.Notify</item>
         <item>2.ScanEventListener.notifyScanSaveResultFinished</item>
         <item>3.ScanEventListener.selectConflictedChannelRegion</item>

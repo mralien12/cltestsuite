@@ -25,9 +25,18 @@ import java.util.concurrent.TimeUnit;
 
 import af.builder.ScanEventListener;
 import af.builder.ScanManager;
+import af.channel.Channel;
+import af.channel.ChannelManager;
 import alticast.com.cltestsuite.utils.TLog;
 
 public class ScanTest {
+    /*
+     * Define final variables corresponding to list of test case in values/strings.xml
+     */
+    public static final int NOTTITY = 0;
+    public static final int NOTIFY_SCAN_SAVE_RESULT_FINISH = 1;
+    public static final int SELECT_CONFLICT_CHANNEL_REGION = 2;
+
     private static final int SCAN_TIMEOUT = 10;     /* seconds */
     private static final String SAT_NAME = "ASTRA_1";
     private static final int LNB_FREQ = 9750;
@@ -37,10 +46,12 @@ public class ScanTest {
 
     private static ScanTest instance;
     private static RScanParam rScanParam;
-    private boolean ret;
+    private static boolean ret;
 
-    private ScanTest(){}
-    public static synchronized ScanTest getInstance(){
+    private ScanTest() {
+    }
+
+    public static synchronized ScanTest getInstance() {
         if (instance == null) {
             instance = new ScanTest();
         }
@@ -48,7 +59,7 @@ public class ScanTest {
         if (rScanParam == null) {
             setUp();
         }
-        return  instance;
+        return instance;
     }
 
     private static void setUp() {
@@ -72,12 +83,12 @@ public class ScanTest {
      * A. Try to start scan.
      * B. Get the notification after completing scan, whether it’s success or failure
      */
-    public boolean SCA_NotifyAfterCompletingScan(){
+    public boolean SCA_Notify() {
         ret = false;
         ScanManager.getInstance().setEventListener(new ScanEventListener() {
             @Override
             public void notify(RScanEventObject rScanEventObject) {
-                TLog.i(this, "SC_NotifyAfterCompletingScan: Notify Event");
+                TLog.i(this, "SC_Notify: Notify Event");
                 ret = true;
             }
 
@@ -93,7 +104,7 @@ public class ScanTest {
         });
 
         if (!ScanManager.getInstance().startScan(rScanParam)) {
-            TLog.e(this, "SCA_NotifyAfterCompletingScan: Failed to start scan");
+            TLog.e(this, "SCA_Notify: Failed to start scan");
             return false;
         }
 
@@ -105,12 +116,12 @@ public class ScanTest {
         }
 
         if (!ScanManager.getInstance().stopScan()) {
-            TLog.e(this, "SCA_NotifyAfterCompletingScan: Failed to stop scan");
+            TLog.e(this, "SCA_Notify: Failed to stop scan");
             return false;
         }
 
         if (!ret) {
-            TLog.e(this, "SCA_NotifyAfterCompletingScan: Failed");
+            TLog.e(this, "SCA_Notify: Failed");
             return false;
         }
 
@@ -120,9 +131,9 @@ public class ScanTest {
     /*
     * ScanEventListener.notifyScanSaveResultFinished
     * A. Try to start scan.
-    * B. Get the notification after calling the Notify. And Could get a channel list.a
+    * B. Get the notification after calling the Notify. And Could get a channel list.
     */
-    public boolean SCA_NofifyScanSaveResultFinished(){
+    public boolean SCA_NofifyScanSaveResultFinished() {
         ret = false;
         ScanManager.getInstance().setEventListener(new ScanEventListener() {
             @Override
@@ -132,7 +143,7 @@ public class ScanTest {
 
             @Override
             public void notifyScanSaveResultFinished() {
-                TLog.i(this,  "SCA_NofifyScanSaveResultFinished: Notify Event");
+                TLog.i(this, "SCA_NofifyScanSaveResultFinished: Notify Event");
                 ret = true;
             }
 
@@ -154,7 +165,7 @@ public class ScanTest {
             e.printStackTrace();
         }
 
-        if(!ScanManager.getInstance().saveResult()) {
+        if (!ScanManager.getInstance().saveResult()) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to save result");
             return false;
         }
@@ -176,6 +187,24 @@ public class ScanTest {
             return false;
         }
 
+        Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
+        if (channels.length <= 0) {
+            TLog.e(this, "SCA_NofifyScanSaveResultFinished: Channel list is empty");
+            return false;
+        }
+
+        return ret;
+    }
+
+    /*
+     * ScanEventListener.selectConflictedChannelRegion
+     * A. Make a status that is using fully resource(tuner).
+     * B. Try to start scan.
+     * C. Get the notification.
+     */
+    public boolean SCA_SelectConflictedChannelRegion() {
+        ret = false;
+        //TODO Make a status  that is using fully resources (tuner)
         return ret;
     }
 
