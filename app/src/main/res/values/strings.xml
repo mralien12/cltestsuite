@@ -28,22 +28,22 @@
         <item>3.ScanEventListener.selectConflictedChannelRegion</item>
     </string-array>
 
-    <string-array name="lvChannelTest">
+    <string-array name="channel_test_list">
         <item>1.ChannelListUpdateListener.onChannelListUpdated</item>
         <item>2.ChannelsCallback.onChannelDataReceived</item>
     </string-array>
 
-    <string-array name="lvDVRTest">
+    <string-array name="dvr_test_list">
         <item>1.RecordingsCallback.onRecordingReceived</item>
         <item>2.RecordingManager.StateListener.onStated</item>
         <item>3.RecordingManager.StateListener.onStopped</item>
         <item>4.RecordingSession.RecordingSessionCallback</item>
     </string-array>
 
-    <string-array name="lvEPGTest">
+    <string-array name="epg_test_list">
     </string-array>
 
-    <string-array name="lvMediaTest">
+    <string-array name="media_test_list">
         <item>1.ChannelPlayer </item>
         <item>2.ChannelEventListener.onChannelEvent</item>
         <item>3.MediaPlayer</item>
@@ -51,7 +51,7 @@
         <item>5.CaptionControllerEventListener.onDetatch</item>
     </string-array>
 
-    <string-array name="lvSFTest">
+    <string-array name="sf_test_list">
         <item>1.SectionFilterException</item>
         <item>2.SectionFilterEvent</item>
     </string-array>

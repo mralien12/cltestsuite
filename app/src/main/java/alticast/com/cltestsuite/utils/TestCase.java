@@ -12,27 +12,32 @@
 package alticast.com.cltestsuite.utils;
 
 public class TestCase {
+    public static final int NOT_TEST = 0;
+    public static final int FAIL = 1;
+    public static final int SUCCESS = 2;
+
     private String name;
-    private boolean testResult;
+    private int status;
 
     public TestCase(String name) {
         this.name = name;
+        this.status = NOT_TEST;
     }
 
-    public TestCase(String name, boolean testResult) {
+    public TestCase(String name, int status) {
         this.name = name;
-        this.testResult = testResult;
+        this.status = status;
     }
 
     public String getName() {
         return name;
     }
 
-    public boolean isTestResult() {
-        return testResult;
+    public int getStatus() {
+        return status;
     }
 
-    public void setTestResult(boolean testResult) {
-        this.testResult = testResult;
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

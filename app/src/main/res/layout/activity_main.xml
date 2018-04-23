@@ -51,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="5dp"
+            android:background="@drawable/state_selector"
             android:orientation="vertical">
 
             //1.Scan Test
@@ -65,9 +66,12 @@
                 android:textSize="@dimen/list_header_size" />
 
             <ListView
-                android:id="@+id/lvScanTest"
+                android:id="@+id/scan_test_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
 
             //2.Channel List Test
             <Button
@@ -81,9 +85,12 @@
                 android:gravity="left" />
 
             <ListView
-                android:id="@+id/lvChannelTest"
+                android:id="@+id/channel_test_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
 
             //3.DVR Test
             <Button
@@ -97,9 +104,12 @@
                 android:gravity="left" />
 
             <ListView
-                android:id="@+id/lvDVRTest"
+                android:id="@+id/dvr_test_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
 
             //4.EPG Test
             <Button
@@ -113,9 +123,12 @@
                 android:gravity="left" />
 
             <ListView
-                android:id="@+id/lvEPGTest"
+                android:id="@+id/epg_test_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
 
             //5.Media Test
             <Button
@@ -129,9 +142,12 @@
                 android:gravity="left" />
 
             <ListView
-                android:id="@+id/lvMediaTest"
+                android:id="@+id/media_test_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
 
             //6.Section Filter Test
             <Button
@@ -145,9 +161,12 @@
                 android:gravity="left" />
 
             <ListView
-                android:id="@+id/lvSFTest"
+                android:id="@+id/sf_test_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

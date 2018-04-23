@@ -22,18 +22,25 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
+import alticast.com.cltestsuite.utils.TestCase;
+import alticast.com.cltestsuite.utils.TestCaseAdapter;
 
 public class MainActivity extends Activity {
 
-    private ListView lvScanTest, lvChannelTest, lvDVRTest, lvEPGTest, lvMediaTest, lvSFTest;
-    private Button btn_test_all, btn_show_result, btn_export_result;
-    private Button btn_all_scan_test, btn_all_channel_test, btn_all_dvr_test, btn_all_epg_test, btn_all_media_test, btn_all_sf_test;
+    private ListView lvScanTest, lvChannelTest, lvDVRTest, lvEpgTest, lvMediaTest, lvSFTest;
+    private Button btnTestAll, btnShowResult, btnExportResult;
+    private Button btnAllScanTest, btnAllChannelTest, btnAllDvrTest, btnAllEpgTest, btnAllMediaTest, btnAllSfTest;
 
     private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrSFTest;
     private boolean ret;
 
     private Thread threadScan, threadAllScanTest;
+    private List<TestCase> scanTestCaseList;
+    private TestCaseAdapter scanTestAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,26 +68,26 @@ public class MainActivity extends Activity {
         ListUtils.setDynamicHeight(lvScanTest);
         ListUtils.setDynamicHeight(lvChannelTest);
         ListUtils.setDynamicHeight(lvDVRTest);
-        ListUtils.setDynamicHeight(lvEPGTest);
+        ListUtils.setDynamicHeight(lvEpgTest);
         ListUtils.setDynamicHeight(lvMediaTest);
         ListUtils.setDynamicHeight(lvSFTest);
 
         // Top Button Event
-        btn_test_all.setOnClickListener(new View.OnClickListener() {
+        btnTestAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 testAllFunction();
             }
         });
 
-        btn_show_result.setOnClickListener(new View.OnClickListener() {
+        btnShowResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
 
-        btn_export_result.setOnClickListener(new View.OnClickListener() {
+        btnExportResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -88,7 +95,7 @@ public class MainActivity extends Activity {
         });
 
         // List Button Event
-        btn_all_scan_test.setOnClickListener(new View.OnClickListener() {
+        btnAllScanTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (threadAllScanTest != null) {
@@ -107,8 +114,8 @@ public class MainActivity extends Activity {
                                 @Override
                                 public void run() {
                                     for (int pos = 0; pos < arrScanTest.length; pos++) {
-                                        lvScanTest.getChildAt(pos).setBackgroundColor(getResources().
-                                                getColor(android.R.color.transparent));
+                                        scanTestCaseList.get(pos).setStatus(TestCase.NOT_TEST);
+                                        scanTestAdapter.notifyDataSetChanged();
                                     }
 
                                     //TODO Add progress bar when running scan
@@ -119,27 +126,42 @@ public class MainActivity extends Activity {
                                 }
                             });
 
-                            final boolean retNotify = ScanTest.getInstance().SCA_Notify();
+                            boolean retNotify = ScanTest.getInstance().SCA_Notify();
+                            if (retNotify) {
+                                scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.SUCCESS);
+                            } else {
+                                scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.FAIL);
+                            }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setResultItemColor(lvScanTest, 0, retNotify);
+                                    scanTestAdapter.notifyDataSetChanged();
                                 }
                             });
 
-                            final boolean retNofifySave = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                            boolean retNofifySave = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                            if (retNotify) {
+                                scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.SUCCESS);
+                            } else {
+                                scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.FAIL);
+                            }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setResultItemColor(lvScanTest, 1, retNofifySave);
+                                    scanTestAdapter.notifyDataSetChanged();
                                 }
                             });
 
-                            final boolean retConflict = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
+                            boolean retConflict = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
+                            if (retConflict) {
+                                scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.SUCCESS);
+                            } else {
+                                scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.FAIL);
+                            }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    setResultItemColor(lvScanTest, 2, retConflict);
+                                    scanTestAdapter.notifyDataSetChanged();
                                 }
                             });
                         }
@@ -149,35 +171,35 @@ public class MainActivity extends Activity {
             }
         });
 
-        btn_all_channel_test.setOnClickListener(new View.OnClickListener() {
+        btnAllChannelTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
 
-        btn_all_dvr_test.setOnClickListener(new View.OnClickListener() {
+        btnAllDvrTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
 
-        btn_all_epg_test.setOnClickListener(new View.OnClickListener() {
+        btnAllEpgTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
 
-        btn_all_media_test.setOnClickListener(new View.OnClickListener() {
+        btnAllMediaTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
 
-        btn_all_sf_test.setOnClickListener(new View.OnClickListener() {
+        btnAllSfTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -186,45 +208,50 @@ public class MainActivity extends Activity {
     }
 
     private void testAllFunction() {
-        String test = "" + lvScanTest.getChildAt(0).hasOnClickListeners();
-        Toast.makeText(this, test, Toast.LENGTH_SHORT).show();
     }
 
     private void addControll() {
         // Add ListView
         arrScanTest = getResources().getStringArray(R.array.scan_test_list);
-        arrChannelTest = getResources().getStringArray(R.array.lvChannelTest);
-        arrDVRTest = getResources().getStringArray(R.array.lvDVRTest);
-        arrEPGTest = getResources().getStringArray(R.array.lvEPGTest);
-        arrMediaTest = getResources().getStringArray(R.array.lvMediaTest);
-        arrSFTest = getResources().getStringArray(R.array.lvSFTest);
+        arrChannelTest = getResources().getStringArray(R.array.channel_test_list);
+        arrDVRTest = getResources().getStringArray(R.array.dvr_test_list);
+        arrEPGTest = getResources().getStringArray(R.array.epg_test_list);
+        arrMediaTest = getResources().getStringArray(R.array.media_test_list);
+        arrSFTest = getResources().getStringArray(R.array.sf_test_list);
 
-        lvScanTest = findViewById(R.id.lvScanTest);
-        lvChannelTest = findViewById(R.id.lvChannelTest);
-        lvDVRTest = findViewById(R.id.lvDVRTest);
-        lvEPGTest = findViewById(R.id.lvEPGTest);
-        lvMediaTest = findViewById(R.id.lvMediaTest);
-        lvSFTest = findViewById(R.id.lvSFTest);
+        lvScanTest = findViewById(R.id.scan_test_list_view);
+        lvChannelTest = findViewById(R.id.channel_test_list_view);
+        lvDVRTest = findViewById(R.id.dvr_test_list_view);
+        lvEpgTest = findViewById(R.id.epg_test_list_view);
+        lvMediaTest = findViewById(R.id.media_test_list_view);
+        lvSFTest = findViewById(R.id.sf_test_list_view);
 
-        lvScanTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrScanTest));
+        /* Add test case for scan testsuite */
+        scanTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrScanTest.length; testCase++) {
+            scanTestCaseList.add(new TestCase(arrScanTest[testCase]));
+        }
+        scanTestAdapter = new TestCaseAdapter(this, scanTestCaseList);
+        lvScanTest.setAdapter(scanTestAdapter);
+
         lvChannelTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrChannelTest));
         lvDVRTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrDVRTest));
-        lvEPGTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrEPGTest));
+        lvEpgTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrEPGTest));
         lvMediaTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrMediaTest));
         lvSFTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrSFTest));
 
         // Add Top Button
-        btn_test_all = findViewById(R.id.btn_test_all);
-        btn_show_result = findViewById(R.id.btn_show_result);
-        btn_export_result = findViewById(R.id.btn_export_result);
+        btnTestAll = findViewById(R.id.btn_test_all);
+        btnShowResult = findViewById(R.id.btn_show_result);
+        btnExportResult = findViewById(R.id.btn_export_result);
 
         // Add List Button
-        btn_all_scan_test = findViewById(R.id.btn_all_scan_test);
-        btn_all_channel_test = findViewById(R.id.btn_all_channel_test);
-        btn_all_dvr_test = findViewById(R.id.btn_all_dvr_test);
-        btn_all_epg_test = findViewById(R.id.btn_all_epg_test);
-        btn_all_media_test = findViewById(R.id.btn_all_media_test);
-        btn_all_sf_test = findViewById(R.id.btn_all_sf_test);
+        btnAllScanTest = findViewById(R.id.btn_all_scan_test);
+        btnAllChannelTest = findViewById(R.id.btn_all_channel_test);
+        btnAllDvrTest = findViewById(R.id.btn_all_dvr_test);
+        btnAllEpgTest = findViewById(R.id.btn_all_epg_test);
+        btnAllMediaTest = findViewById(R.id.btn_all_media_test);
+        btnAllSfTest = findViewById(R.id.btn_all_sf_test);
     }
 
     public static class ListUtils {
@@ -245,16 +272,6 @@ public class MainActivity extends Activity {
             params.height = height + (mListView.getDividerHeight() * (mListAdapter.getCount() - 1));
             mListView.setLayoutParams(params);
             mListView.requestLayout();
-        }
-    }
-
-    private void setResultItemColor(ListView lv, int position, boolean ret) {
-        if (ret) {
-            lv.getChildAt(position).setBackground(getResources()
-                    .getDrawable(R.drawable.background_item_success));
-        } else {
-            lv.getChildAt(position).setBackground(getResources()
-                    .getDrawable(R.drawable.background_item_fail));
         }
     }
 
@@ -285,16 +302,30 @@ public class MainActivity extends Activity {
                     default:
                 }
 
+                if (ret) {
+                    scanTestCaseList.get(position).setStatus(TestCase.SUCCESS);
+                } else {
+                    scanTestCaseList.get(position).setStatus(TestCase.FAIL);
+                }
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        setResultItemColor(lvScanTest, position, ret);
+                        scanTestAdapter.notifyDataSetChanged();
                     }
                 });
             }
         });
         Toast.makeText(getApplicationContext(), "Testcase " + arrScanTest[position],
                 Toast.LENGTH_SHORT).show();
+
+        scanTestCaseList.get(position).setStatus(TestCase.NOT_TEST);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                scanTestAdapter.notifyDataSetChanged();
+            }
+        });
         threadScan.start();
     }
 }
