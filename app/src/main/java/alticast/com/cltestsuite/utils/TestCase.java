@@ -13,20 +13,21 @@ package alticast.com.cltestsuite.utils;
 
 public class TestCase {
     public static final int NOT_TEST = 0;
+    public static final int TEST_RUNNING = 1;
+    public static final int TEST_DONE = 2;
+
     public static final int FAIL = 1;
     public static final int SUCCESS = 2;
 
     private String name;
     private int status;
+    private int result;
+
 
     public TestCase(String name) {
         this.name = name;
         this.status = NOT_TEST;
-    }
-
-    public TestCase(String name, int status) {
-        this.name = name;
-        this.status = status;
+        this.result = NOT_TEST;
     }
 
     public String getName() {
@@ -39,5 +40,13 @@ public class TestCase {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public int getResult() {
+        return result;
+    }
+
+    public void setResult(int result) {
+        this.result = result;
     }
 }

@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
     private Button btnAllScanTest, btnAllChannelTest, btnAllDvrTest, btnAllEpgTest, btnAllMediaTest, btnAllSfTest;
 
     private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrSFTest;
-    private boolean ret;
+    private int ret;
 
     private Thread threadScan, threadAllScanTest;
     private List<TestCase> scanTestCaseList;
@@ -50,8 +50,6 @@ public class MainActivity extends Activity {
         addControll();
         addEvent();
         addListener();
-        //TODO Add global variable to save test case status
-        //TODO Change backgound when list item is forcus on
     }
 
     private void addListener() {
@@ -114,24 +112,23 @@ public class MainActivity extends Activity {
                                 @Override
                                 public void run() {
                                     for (int pos = 0; pos < arrScanTest.length; pos++) {
-                                        scanTestCaseList.get(pos).setStatus(TestCase.NOT_TEST);
+                                        scanTestCaseList.get(pos).setResult(TestCase.NOT_TEST);
                                         scanTestAdapter.notifyDataSetChanged();
                                     }
-
-                                    //TODO Add progress bar when running scan
-//                                    ProgressBar progressBar = new ProgressBar(MainActivity.this, null, android.R.attr.progressBarStyle);
-//                                    LinearLayout linearLayout = (LinearLayout) findViewById(R.id.rootView);
-//                                    linearLayout.addView(progressBar);
-//                                    progressBar.setVisibility(View.VISIBLE);
                                 }
                             });
 
-                            boolean retNotify = ScanTest.getInstance().SCA_Notify();
-                            if (retNotify) {
-                                scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.SUCCESS);
-                            } else {
-                                scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.FAIL);
-                            }
+                            scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.TEST_RUNNING);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    scanTestAdapter.notifyDataSetChanged();
+                                }
+                            });
+                            int retNotify = ScanTest.getInstance().SCA_Notify();
+                            scanTestCaseList.get(ScanTest.NOTTITY).setResult(retNotify);
+                            scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.TEST_DONE);
+
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -139,12 +136,16 @@ public class MainActivity extends Activity {
                                 }
                             });
 
-                            boolean retNofifySave = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
-                            if (retNotify) {
-                                scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.SUCCESS);
-                            } else {
-                                scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.FAIL);
-                            }
+                            scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.TEST_RUNNING);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    scanTestAdapter.notifyDataSetChanged();
+                                }
+                            });
+                            int retNofifySave = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                            scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setResult(retNofifySave);
+                            scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.TEST_DONE);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -152,12 +153,16 @@ public class MainActivity extends Activity {
                                 }
                             });
 
-                            boolean retConflict = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
-                            if (retConflict) {
-                                scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.SUCCESS);
-                            } else {
-                                scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.FAIL);
-                            }
+                            scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.TEST_RUNNING);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    scanTestAdapter.notifyDataSetChanged();
+                                }
+                            });
+                            int retConflict = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
+                            scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setResult(retConflict);
+                            scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.TEST_DONE);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -288,7 +293,14 @@ public class MainActivity extends Activity {
         threadScan = new Thread(new Runnable() {
             @Override
             public void run() {
-                ret = false;
+                ret = TestCase.FAIL;
+                scanTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        scanTestAdapter.notifyDataSetChanged();
+                    }
+                });
                 switch (position) {
                     case ScanTest.NOTTITY:
                         ret = ScanTest.getInstance().SCA_Notify();
@@ -302,12 +314,8 @@ public class MainActivity extends Activity {
                     default:
                 }
 
-                if (ret) {
-                    scanTestCaseList.get(position).setStatus(TestCase.SUCCESS);
-                } else {
-                    scanTestCaseList.get(position).setStatus(TestCase.FAIL);
-                }
-
+                scanTestCaseList.get(position).setResult(ret);
+                scanTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

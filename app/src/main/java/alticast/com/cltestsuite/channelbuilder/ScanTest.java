@@ -28,6 +28,7 @@ import af.builder.ScanManager;
 import af.channel.Channel;
 import af.channel.ChannelManager;
 import alticast.com.cltestsuite.utils.TLog;
+import alticast.com.cltestsuite.utils.TestCase;
 
 public class ScanTest {
     /*
@@ -46,7 +47,7 @@ public class ScanTest {
 
     private static ScanTest instance;
     private static RScanParam rScanParam;
-    private static boolean ret;
+    private static int ret;
 
     private ScanTest() {
     }
@@ -83,13 +84,13 @@ public class ScanTest {
      * A. Try to start scan.
      * B. Get the notification after completing scan, whether it’s success or failure
      */
-    public boolean SCA_Notify() {
-        ret = false;
+    public int SCA_Notify() {
+        ret = TestCase.FAIL;
         ScanManager.getInstance().setEventListener(new ScanEventListener() {
             @Override
             public void notify(RScanEventObject rScanEventObject) {
                 TLog.i(this, "SC_Notify: Notify Event");
-                ret = true;
+                ret = TestCase.SUCCESS;
             }
 
             @Override
@@ -105,7 +106,7 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().startScan(rScanParam)) {
             TLog.e(this, "SCA_Notify: Failed to start scan");
-            return false;
+            return TestCase.FAIL;
         }
 
         /* Wait few seconds for scan progress */
@@ -117,12 +118,11 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().stopScan()) {
             TLog.e(this, "SCA_Notify: Failed to stop scan");
-            return false;
+            return TestCase.FAIL;
         }
 
-        if (!ret) {
+        if (ret == TestCase.FAIL) {
             TLog.e(this, "SCA_Notify: Failed");
-            return false;
         }
 
         return ret;
@@ -133,8 +133,8 @@ public class ScanTest {
     * A. Try to start scan.
     * B. Get the notification after calling the Notify. And Could get a channel list.
     */
-    public boolean SCA_NofifyScanSaveResultFinished() {
-        ret = false;
+    public int SCA_NofifyScanSaveResultFinished() {
+        ret = TestCase.FAIL;
         ScanManager.getInstance().setEventListener(new ScanEventListener() {
             @Override
             public void notify(RScanEventObject rScanEventObject) {
@@ -144,7 +144,7 @@ public class ScanTest {
             @Override
             public void notifyScanSaveResultFinished() {
                 TLog.i(this, "SCA_NofifyScanSaveResultFinished: Notify Event");
-                ret = true;
+                ret = TestCase.SUCCESS;
             }
 
             @Override
@@ -155,7 +155,7 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().startScan(rScanParam)) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to start scan");
-            return false;
+            return TestCase.FAIL;
         }
 
         /* Wait few seconds for scan progress */
@@ -167,7 +167,7 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().saveResult()) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to save result");
-            return false;
+            return TestCase.FAIL;
         }
 
         /* Delay few miliseconds for save result notify callback */
@@ -179,18 +179,18 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().stopScan()) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to stop scan");
-            return false;
+            return TestCase.FAIL;
         }
 
-        if (!ret) {
+        if (ret == TestCase.FAIL) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed");
-            return false;
+            return TestCase.FAIL;
         }
 
         Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         if (channels.length <= 0) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Channel list is empty");
-            return false;
+            return TestCase.FAIL;
         }
 
         return ret;
@@ -202,8 +202,8 @@ public class ScanTest {
      * B. Try to start scan.
      * C. Get the notification.
      */
-    public boolean SCA_SelectConflictedChannelRegion() {
-        ret = false;
+    public int SCA_SelectConflictedChannelRegion() {
+        ret = TestCase.FAIL;
         //TODO Make a status  that is using fully resources (tuner)
         return ret;
     }
