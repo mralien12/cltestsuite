@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -40,8 +39,10 @@ public class MainActivity extends Activity {
     private int ret;
 
     private Thread threadScan, threadAllScanTest, threadAllDvrTest;
-    private List<TestCase> scanTestCaseList, dvrTestCaseList;
-    private TestCaseAdapter scanTestAdapter, dvrTestAdapter;
+    private List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
+    private List<TestCase> epgTestCaseList, mediaTestCaseList, sfTestCaseList;
+    private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
+    private TestCaseAdapter epgTestAdapter, mediaTestAdaper, sfTestAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,7 +215,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -223,7 +224,7 @@ public class MainActivity extends Activity {
                             int retOnRecordingReceived = DVRTest.getInstance().onRecordingReceived();
                             dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setResult(retOnRecordingReceived);
                             dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -231,7 +232,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -240,7 +241,7 @@ public class MainActivity extends Activity {
                             int retStateListenerOnStated = DVRTest.getInstance().stateListenerOnStated();
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setResult(retStateListenerOnStated);
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -248,7 +249,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -257,7 +258,7 @@ public class MainActivity extends Activity {
                             int retStateListenerOnStoped = DVRTest.getInstance().stateListenerOnStoped();
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setResult(retStateListenerOnStoped);
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -265,7 +266,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -274,7 +275,7 @@ public class MainActivity extends Activity {
                             int retRecordingSessionCallback = DVRTest.getInstance().recordingSessionCallback();
                             dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setResult(retRecordingSessionCallback);
                             dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -328,7 +329,7 @@ public class MainActivity extends Activity {
         lvMediaTest = findViewById(R.id.media_test_list_view);
         lvSFTest = findViewById(R.id.sf_test_list_view);
 
-        /*01 Add test case for scan testsuite */
+        /* Add test case for scan testsuite */
         scanTestCaseList = new ArrayList<TestCase>();
         for (int testCase = 0; testCase < arrScanTest.length; testCase++) {
             scanTestCaseList.add(new TestCase(arrScanTest[testCase]));
@@ -336,7 +337,16 @@ public class MainActivity extends Activity {
         scanTestAdapter = new TestCaseAdapter(this, scanTestCaseList);
         lvScanTest.setAdapter(scanTestAdapter);
 
-        //03 Add list DVR testcase
+        /* Add test case for channel testsuite */
+        channelTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrChannelTest.length; testCase++) {
+            channelTestCaseList.add(new TestCase(arrChannelTest[testCase]));
+        }
+        channelTestAdapter = new TestCaseAdapter(this, channelTestCaseList);
+        lvChannelTest.setAdapter(channelTestAdapter);
+
+
+        /* Add test case for dvr testsuite */
         dvrTestCaseList = new ArrayList<TestCase>();
         for (int testCase = 0; testCase < arrDVRTest.length; testCase++) {
             dvrTestCaseList.add(new TestCase(arrDVRTest[testCase]));
@@ -344,11 +354,29 @@ public class MainActivity extends Activity {
         dvrTestAdapter = new TestCaseAdapter(this, dvrTestCaseList);
         lvDVRTest.setAdapter(dvrTestAdapter);
 
+        /* Add test case for epg testsuite */
+        epgTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrEPGTest.length; testCase++) {
+            epgTestCaseList.add(new TestCase(arrEPGTest[testCase]));
+        }
+        epgTestAdapter = new TestCaseAdapter(this, epgTestCaseList);
+        lvEpgTest.setAdapter(epgTestAdapter);
 
-        lvChannelTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrChannelTest));
-        lvEpgTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrEPGTest));
-        lvMediaTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrMediaTest));
-        lvSFTest.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arrSFTest));
+        /* Add test case for media testsuite */
+        mediaTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrMediaTest.length; testCase++) {
+            mediaTestCaseList.add(new TestCase(arrMediaTest[testCase]));
+        }
+        mediaTestAdaper = new TestCaseAdapter(this, mediaTestCaseList);
+        lvMediaTest.setAdapter(mediaTestAdaper);
+
+        /* Add test case for SF testsuite */
+        sfTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrSFTest.length; testCase++) {
+            sfTestCaseList.add(new TestCase(arrSFTest[testCase]));
+        }
+        sfTestAdapter = new TestCaseAdapter(this, sfTestCaseList);
+        lvSFTest.setAdapter(sfTestAdapter);
 
         // Add Top Button
         btnTestAll = findViewById(R.id.btn_test_all);
@@ -388,7 +416,8 @@ public class MainActivity extends Activity {
     public void testScanEventListener(final int position) {
         if (threadScan != null) {
             if (threadScan.isAlive()) {
-                Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Wait for current test case finish",
+                        Toast.LENGTH_LONG).show();
                 return;
 
             }
