@@ -38,7 +38,7 @@ public class ScanTest {
     public static final int NOTIFY_SCAN_SAVE_RESULT_FINISH = 1;
     public static final int SELECT_CONFLICT_CHANNEL_REGION = 2;
 
-    private static final int SCAN_TIMEOUT = 10;     /* seconds */
+    private static final int SCAN_TIMEOUT = 30;     /* seconds */
     private static final String SAT_NAME = "ASTRA_1";
     private static final int LNB_FREQ = 9750;
     private static final int FREQ = 11362;
