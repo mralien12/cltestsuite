@@ -12,6 +12,7 @@
 package alticast.com.cltestsuite.dvr;
 
 import android.app.ProgressDialog;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,6 +29,8 @@ import com.alticast.af.builder.RTuneParamSat;
 import com.alticast.af.builder.RTuneTpInfoSat;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -47,42 +50,68 @@ import af.dvr.RecordingSessionCallback;
 import af.epg.Program;
 import af.resource.NoAvailableResourceException;
 import af.resource.ResourceClient;
+import alticast.com.cltestsuite.channelbuilder.ScanTest;
+import alticast.com.cltestsuite.utils.TestCase;
 
 public class DVRTest {
+    public static final int ON_RECORDING_RECEIVED = 0;
+    public static final int STATE_LISTENER_ON_STATED = 1;
+    public static final int STATE_LISTENER_ON_STOPED = 2;
+    public static final int RECORDING_SESSION_CALLBACK = 3;
+
     private Channel[] channels;
     private Channel currentChannel;
     private RecordingSession recordingSession;
     private int timeChecking;
-    private boolean returnResult, isTunedSuccess, isRecordingStopped, isRecordingStarted, isRightTime;
+    private static boolean isTunedSuccess, isRecordingStopped, isRecordingStarted, isRightTime;
     private Recording record;
+    private static DVRTest instance = null;
+    private static int ret;
+    private static int retStart, retStop;
+    private static String devices;
+    private static int count = 0;
 
-    public DVRTest() {
+    private static RecordingManager recordingManager;
+    private static final String LOGTAG = "DVRTest";
+
+    protected DVRTest() {
     }
 
-    public boolean onRecordingReceived(){
-        return true;
+    public static synchronized DVRTest getInstance (){
+        retStart = retStop = TestCase.FAIL;
+
+        ScanTest scanTest = ScanTest.getInstance();
+        if (instance == null){
+            instance = new DVRTest();
+
+            recordingManager.getInstance().setStateListener(new RecordingManager.StateListener() {
+                @Override
+                public void onStarted(String s) {
+                    retStart = TestCase.SUCCESS;
+                    retStop = TestCase.FAIL;
+                }
+
+                @Override
+                public void onStopped() {
+                    retStart = TestCase.FAIL;
+                    retStop = TestCase.SUCCESS;
+                }
+            });
+        }
+
+        return instance;
     }
 
-    public boolean stateListenerOnStated(){
-        return true;
+    // not have idea
+    public int onRecordingReceived(){
+        ret = TestCase.FAIL;
+        return ret;
     }
 
-    public boolean stateListenerOnStoped(){
-        return true;
-    }
+    public int stateListenerOnStated(){
+        devices = null;
 
-    public boolean recordingSessionCallback() {
-        returnResult = false;
-        isTunedSuccess = false;
-        isRecordingStopped = false;
-        isRecordingStarted = false;
-        isRightTime = false;
-        timeChecking = 10;
-
-        //
-        ScanResult();
-        //
-
+        //add device rootpath
         List<String> list = new ArrayList<String>();
         BufferedReader buf_reader = null;
         try {
@@ -90,17 +119,16 @@ public class DVRTest {
             String line;
 
             while ((line = buf_reader.readLine()) != null) {
-                if (line.contains("/mnt/media_rw") || line.contains("/mnt/expand")) {
-                    StringTokenizer tokens = new StringTokenizer(line, " ");
-                    String unused = tokens.nextToken(); // device
-                    String mount_point = tokens.nextToken(); // mount point/
-                    list.add(mount_point + "/");
+                if (line.contains("/mnt/media_rw")) {
+                    String[] tokens = line.split(" ");
+                    devices = tokens[1];
+                    Log.i(LOGTAG,"rootpath: "+ devices);
                 }
             }
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         } finally {
             if (buf_reader != null) {
                 try {
@@ -110,10 +138,45 @@ public class DVRTest {
             }
         }
 
-        if (list.size() > 0) {
-            String dvr_storage_path = list.get(0);
-            RecordingManager.getInstance().start(dvr_storage_path);
+        if (devices!=null) {
+            recordingManager.getInstance().start(devices + "/");
         }
+
+        /* Delay few miliseconds for save result*/
+        try {
+            TimeUnit.MILLISECONDS.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return retStart;
+    }
+
+    public int stateListenerOnStoped(){
+        recordingManager.getInstance().stop();
+
+        /* Delay few miliseconds for save result*/
+        try {
+            TimeUnit.MILLISECONDS.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return retStop;
+    }
+
+    public int recordingSessionCallback() {
+        ret = TestCase.FAIL;
+        isTunedSuccess = false;
+        isRecordingStopped = false;
+        isRecordingStarted = false;
+        isRightTime = false;
+        timeChecking = 30;
+
+        //
+        ScanResult();
+        //
+
+        stateListenerOnStated();
+        RecordingManager.getInstance().start(devices+"/");
 
         if (channels == null) {
             channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
@@ -128,6 +191,7 @@ public class DVRTest {
                     @Override
                     public void onError(short i) {
                         isTunedSuccess = false;
+                        Log.e(LOGTAG,"onError");
                     }
 
                     @Override
@@ -173,33 +237,38 @@ public class DVRTest {
         } else {
         }
 
-        Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
-        if (programs.length > 0) {
-            record = recordingSession.startRecording(programs[0].getProgramUri());
-            try {
-                TimeUnit.SECONDS.sleep(timeChecking);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
+            if (programs.length > 0) {
+                record = recordingSession.startRecording(programs[0].getProgramUri());
+                try {
+                    TimeUnit.SECONDS.sleep(timeChecking);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-            recordingSession.stopRecording();
-            if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
-                isRightTime = true;
-            if (!isRightTime) {
-            }
+                recordingSession.stopRecording();
+                if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
+                    isRightTime = true;
+                if (!isRightTime) {
+                    Log.e(LOGTAG, "Wrong recording time");
+                }
 
-            recordingSession.release();
-            RecordingManager.getInstance().stop();
-        } else {
+                recordingSession.release();
+                RecordingManager.getInstance().stop();
+
+                if (isTunedSuccess == true && isRecordingStopped == true && isRightTime == true)
+                    ret = TestCase.SUCCESS;
+            }
+        }catch (NullPointerException e){
+            Log.e(LOGTAG, "Can not catch any programs");
+            ret = TestCase.FAIL;
         }
 
-        if (isTunedSuccess == true && isRecordingStarted == true && isRecordingStopped == true)
-            returnResult = true;
-
-        Log.d("LEHAI","isTunedSuccess: "+isTunedSuccess+"--isRecordingStarted: "
+        Log.d(LOGTAG,"isTunedSuccess: "+count+"--isRecordingStarted: "
                 +isRecordingStarted+"--isRecordingStopped: "+isRecordingStopped+"--isTunedSuccess: "+isTunedSuccess);
 
-        return returnResult;
+        return ret;
     }
 
     // Addition DEMO Scan
@@ -210,7 +279,7 @@ public class DVRTest {
     private static final int POLARIZATION = 1;
     private static final int TIMEOUT = 30;
     private RScanParam rs;
-    private boolean ret;
+    private boolean retz;
     private ProgressBar pgbScan;
 
     private RScanParam generateParam(String satName, int lnb_freq, int transponder_freq){
@@ -254,13 +323,13 @@ public class DVRTest {
 
             @Override
             public void run() {
-                ret = ScanManager.getInstance().startScan(rs);
-                if (!ret) {
+                retz = ScanManager.getInstance().startScan(rs);
+                if (!retz) {
                     return;
                 }
 
-                ret = ScanManager.getInstance().stopScan();
-                if (!ret) {
+                retz = ScanManager.getInstance().stopScan();
+                if (!retz) {
                     return;
                 }
 
@@ -275,14 +344,14 @@ public class DVRTest {
         thrScan.start();
     }
 
-    public boolean ScanResult (){
+    public boolean ScanResult(){
         boolean result = true;
 
         RScanParam rScanParam  = null;
         rScanParam = generateParam(SAT_NAME, LNB_FREQ, FREQ);
         scanSatellite(rScanParam);
 
-        ret = ScanManager.getInstance().saveResult();
+        retz = ScanManager.getInstance().saveResult();
         return result;
     }
 }
