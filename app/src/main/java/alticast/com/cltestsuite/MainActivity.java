@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
+import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
 import alticast.com.cltestsuite.utils.TestCase;
 import alticast.com.cltestsuite.utils.TestCaseAdapter;
@@ -59,6 +60,13 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 testScanEventListener(position);
+            }
+        });
+
+        lvChannelTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                testChannelListListener(position);
             }
         });
 
@@ -187,10 +195,57 @@ public class MainActivity extends Activity {
         btnAllChannelTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Thread threadAllChannelTest = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int ret = TestCase.FAIL;
+                        for (int testCase = 0; testCase < channelTestCaseList.size(); testCase++) {
+                            channelTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                channelTestAdapter.notifyDataSetChanged();
+                            }
+                        });
+
+                        for (int testCase = 0; testCase < channelTestCaseList.size(); testCase++) {
+                            channelTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    channelTestAdapter.notifyDataSetChanged();
+                                }
+                            });
+
+                            switch (testCase) {
+                                case ChannelListTest.CHANNEL_LIST_UPDATED:
+                                    ret = ChannelListTest.getInstance().CHL_OnChannelListUpdated();
+                                    break;
+                                case ChannelListTest.CHANNEL_CALLBACK_ON_CHANNEL_DATA_RECEIVED:
+                                    ret = ChannelListTest.getInstance().CHL_ChannelCallbackOnChannelDataReceived();
+                                    break;
+                                default:
+                            }
+
+                            channelTestCaseList.get(testCase).setResult(ret);
+                            channelTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    channelTestAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
+                    }
+                });
+                threadAllChannelTest.start();
             }
         });
 
-        btnAllDvrTest.setOnClickListener(new View.OnClickListener() {
+        btnAllDvrTest.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
                 if (threadAllDvrTest != null) {
@@ -288,21 +343,27 @@ public class MainActivity extends Activity {
             }
         });
 
-        btnAllEpgTest.setOnClickListener(new View.OnClickListener() {
+        btnAllEpgTest.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
 
             }
         });
 
-        btnAllMediaTest.setOnClickListener(new View.OnClickListener() {
+        btnAllMediaTest.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
 
             }
         });
 
-        btnAllSfTest.setOnClickListener(new View.OnClickListener() {
+        btnAllSfTest.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
 
@@ -469,6 +530,40 @@ public class MainActivity extends Activity {
         threadScan.start();
     }
 
+    public void testChannelListListener(final int position) {
+        ret = TestCase.FAIL;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                channelTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        channelTestAdapter.notifyDataSetChanged();
+                    }
+                });
+                switch (position) {
+                    case ChannelListTest.CHANNEL_LIST_UPDATED:
+                        ret = ChannelListTest.getInstance().CHL_OnChannelListUpdated();
+                        break;
+                    case ChannelListTest.CHANNEL_CALLBACK_ON_CHANNEL_DATA_RECEIVED:
+                        ret = ChannelListTest.getInstance().CHL_ChannelCallbackOnChannelDataReceived();
+                        break;
+                    default:
+                }
+                channelTestCaseList.get(position).setResult(ret);
+                channelTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        channelTestAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        });
+        thread.start();
+
+    }
 
     public void testDVREventListener(final int position) {
         if (threadScan != null) {
