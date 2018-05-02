@@ -14,23 +14,24 @@ package alticast.com.cltestsuite.utils;
 import android.util.Log;
 
 public class TLog {
+    private static final String PROJECT_LOGTAG = "CLTS_";
     public static void i(Object obj, String msg) {
-        String TAG = obj.getClass().getSimpleName();
+        String TAG = PROJECT_LOGTAG + obj.getClass().getSimpleName();
         Log.i(TAG, msg);
     }
 
     public static void w(Object obj, String msg) {
-        String TAG = obj.getClass().getSimpleName();
+        String TAG = PROJECT_LOGTAG + obj.getClass().getSimpleName();
         Log.w(TAG, msg);
     }
 
     public static void d(Object obj, String msg) {
-        String TAG = obj.getClass().getSimpleName();
+        String TAG = PROJECT_LOGTAG + obj.getClass().getSimpleName();
         Log.d(TAG, msg);
     }
 
     public static void e(Object obj, String msg) {
-        String TAG = obj.getClass().getSimpleName();
+        String TAG = PROJECT_LOGTAG + obj.getClass().getSimpleName();
         Log.e(TAG, msg);
     }
 }
