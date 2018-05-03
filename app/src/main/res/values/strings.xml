@@ -20,6 +20,7 @@
     <string name="epg_test">EPG Test</string>
     <string name="media_test">Media Test</string>
     <string name="sf_test">Section Filter Test</string>
+    <string name="test_result">Test Result</string>
 
     <!--When you add a new test case, please add a corresponding final variable in ScanTest.java-->
     <string-array name="scan_test_list">
@@ -40,8 +41,7 @@
         <item>4.RecordingSession.RecordingSessionCallback</item>
     </string-array>
 
-    <string-array name="epg_test_list">
-    </string-array>
+    <string-array name="epg_test_list"></string-array>
 
     <string-array name="media_test_list">
         <item>1.ChannelPlayer </item>

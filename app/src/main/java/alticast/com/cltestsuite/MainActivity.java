@@ -12,21 +12,25 @@
 package alticast.com.cltestsuite;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
+import alticast.com.cltestsuite.utils.ShowResultActivity;
 import alticast.com.cltestsuite.utils.TestCase;
 import alticast.com.cltestsuite.utils.TestCaseAdapter;
 
@@ -44,6 +48,8 @@ public class MainActivity extends Activity {
     private List<TestCase> epgTestCaseList, mediaTestCaseList, sfTestCaseList;
     private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
     private TestCaseAdapter epgTestAdapter, mediaTestAdaper, sfTestAdapter;
+    private List<ShowResultActivity> listTestedTC;
+    private ShowResultActivity showResultActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +104,47 @@ public class MainActivity extends Activity {
         btnShowResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                listTestedTC = new ArrayList<ShowResultActivity>();
 
+                // 1. Scan Test
+                for (TestCase testCase : scanTestCaseList){
+                    if (testCase.getResult() == 1){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == 2){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
+                // 3. DVR Test
+                for (TestCase testCase : dvrTestCaseList){
+                    if (testCase.getResult() == 1){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == 2){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
+                listTestedTC.add(showResultActivity);
+
+                Intent intent = new Intent(MainActivity.this, ShowResultActivity.class);
+                intent.putExtra("TestCaseList", (Serializable) listTestedTC);
+                startActivity(intent);
             }
         });
 
@@ -270,7 +316,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -279,7 +325,7 @@ public class MainActivity extends Activity {
                             int retOnRecordingReceived = DVRTest.getInstance().onRecordingReceived();
                             dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setResult(retOnRecordingReceived);
                             dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -287,7 +333,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -296,7 +342,7 @@ public class MainActivity extends Activity {
                             int retStateListenerOnStated = DVRTest.getInstance().stateListenerOnStated();
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setResult(retStateListenerOnStated);
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -304,7 +350,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -313,7 +359,7 @@ public class MainActivity extends Activity {
                             int retStateListenerOnStoped = DVRTest.getInstance().stateListenerOnStoped();
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setResult(retStateListenerOnStoped);
                             dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -321,7 +367,7 @@ public class MainActivity extends Activity {
                             });
 
                             dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
@@ -330,7 +376,7 @@ public class MainActivity extends Activity {
                             int retRecordingSessionCallback = DVRTest.getInstance().recordingSessionCallback();
                             dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setResult(retRecordingSessionCallback);
                             dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread(new Runnable() {
+                            runOnUiThread( new Runnable() {
                                 @Override
                                 public void run() {
                                     dvrTestAdapter.notifyDataSetChanged();
