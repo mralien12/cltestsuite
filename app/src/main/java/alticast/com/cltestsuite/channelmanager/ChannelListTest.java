@@ -19,6 +19,7 @@ import af.media.Tuner;
 import af.media.TunerFactory;
 import af.resource.NoAvailableResourceException;
 import af.resource.ResourceClient;
+import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
 
@@ -45,6 +46,8 @@ public class ChannelListTest {
         Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         if (channels.length <= 0) {
             TLog.e(this, "CHL_OnChannelListUpdated: Empty channel list");
+            MainActivity.channelTestCaseList.get(ChannelListTest.CHANNEL_LIST_UPDATED).
+                    setFailedReason("Channel list is empty");
             return TestCase.FAIL;
         }
         Channel firstChannel = channels[0];
@@ -71,6 +74,8 @@ public class ChannelListTest {
         try {
             if (!firstTuner.tune(firstChannel.getUri())) {
                 TLog.e(this, "CHL_OnChannelListUpdated: Failed to tune");
+                MainActivity.channelTestCaseList.get(ChannelListTest.CHANNEL_LIST_UPDATED).
+                        setFailedReason("Failed to tune first channel");
                 return TestCase.FAIL;
             }
         } catch (NoAvailableResourceException e) {
@@ -87,6 +92,8 @@ public class ChannelListTest {
         firstTuner.release();
         if (ret == TestCase.FAIL) {
             TLog.e(this, "CHL_OnChannelListUpdated: onTuningEvent failed");
+            MainActivity.channelTestCaseList.get(ChannelListTest.CHANNEL_LIST_UPDATED).
+                    setFailedReason("onTuningEvent callback is not invoked");
         }
         return ret;
     }

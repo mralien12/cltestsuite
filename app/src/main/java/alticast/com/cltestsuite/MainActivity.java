@@ -14,11 +14,9 @@ package alticast.com.cltestsuite;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -45,8 +43,8 @@ public class MainActivity extends Activity {
     private int ret;
 
     private Thread threadScan, threadAllScanTest, threadAllDvrTest;
-    private List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
-    private List<TestCase> epgTestCaseList, mediaTestCaseList, sfTestCaseList;
+    public static List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
+    public static List<TestCase> epgTestCaseList, mediaTestCaseList, sfTestCaseList;
     private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
     private TestCaseAdapter epgTestAdapter, mediaTestAdaper, sfTestAdapter;
     private List<ShowResultActivity> listTestedTC;
@@ -83,6 +81,14 @@ public class MainActivity extends Activity {
                 testDVREventListener(position);
             }
         });
+
+        lvMediaTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getBaseContext(), MediaPlayerTestActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void addEvent() {
@@ -109,16 +115,16 @@ public class MainActivity extends Activity {
 
                 // 1. Scan Test
                 for (TestCase testCase : scanTestCaseList){
-                    if (testCase.getResult() == 1){
+                    if (testCase.getResult() == TestCase.FAIL){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == 2){
+                    } else if (testCase.getResult() == TestCase.SUCCESS){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(true);
                         listTestedTC.add(showResultActivity);
                     }
@@ -126,16 +132,16 @@ public class MainActivity extends Activity {
 
                 // 2. Channel List Test
                 for (TestCase testCase : channelTestCaseList){
-                    if (testCase.getResult() == 1){
+                    if (testCase.getResult() == TestCase.FAIL){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == 2){
+                    } else if (testCase.getResult() == TestCase.SUCCESS){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(true);
                         listTestedTC.add(showResultActivity);
                     }
@@ -143,16 +149,16 @@ public class MainActivity extends Activity {
 
                 // 3. DVR Test
                 for (TestCase testCase : dvrTestCaseList){
-                    if (testCase.getResult() == 1){
+                    if (testCase.getResult() == TestCase.FAIL){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == 2){
+                    } else if (testCase.getResult() == TestCase.FAIL){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(true);
                         listTestedTC.add(showResultActivity);
                     }
@@ -160,16 +166,16 @@ public class MainActivity extends Activity {
 
                 // 4. EPG Test
                 for (TestCase testCase : epgTestCaseList){
-                    if (testCase.getResult() == 1){
+                    if (testCase.getResult() == TestCase.FAIL){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == 2){
+                    } else if (testCase.getResult() == TestCase.SUCCESS){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(true);
                         listTestedTC.add(showResultActivity);
                     }
@@ -177,16 +183,16 @@ public class MainActivity extends Activity {
 
                 // 5. Media Test
                 for (TestCase testCase : mediaTestCaseList){
-                    if (testCase.getResult() == 1){
+                    if (testCase.getResult() == TestCase.FAIL){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == 2){
+                    } else if (testCase.getResult() == TestCase.SUCCESS){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(true);
                         listTestedTC.add(showResultActivity);
                     }
@@ -194,16 +200,16 @@ public class MainActivity extends Activity {
 
                 // 6. Section Filter Test
                 for (TestCase testCase : sfTestCaseList){
-                    if (testCase.getResult() == 1){
+                    if (testCase.getResult() == TestCase.FAIL){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == 2){
+                    } else if (testCase.getResult() == TestCase.SUCCESS){
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
-                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(true);
                         listTestedTC.add(showResultActivity);
                     }

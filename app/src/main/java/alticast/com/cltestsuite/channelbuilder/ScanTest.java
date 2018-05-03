@@ -27,6 +27,7 @@ import af.builder.ScanEventListener;
 import af.builder.ScanManager;
 import af.channel.Channel;
 import af.channel.ChannelManager;
+import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
 
@@ -106,6 +107,8 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().startScan(rScanParam)) {
             TLog.e(this, "SCA_Notify: Failed to start scan");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTTITY).
+                    setFailedReason("Failed to start scan");
             return TestCase.FAIL;
         }
 
@@ -118,11 +121,15 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().stopScan()) {
             TLog.e(this, "SCA_Notify: Failed to stop scan");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTTITY).
+                    setFailedReason("Failed to stop scan");
             return TestCase.FAIL;
         }
 
         if (ret == TestCase.FAIL) {
             TLog.e(this, "SCA_Notify: Failed");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTTITY).
+                    setFailedReason("Notify callback is not invoked");
         }
 
         return ret;
@@ -155,6 +162,8 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().startScan(rScanParam)) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to start scan");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
+                    setFailedReason("Failed to start scan");
             return TestCase.FAIL;
         }
 
@@ -167,6 +176,8 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().saveResult()) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to save result");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
+                    setFailedReason("Failed to save scan result after finishing scan");
             return TestCase.FAIL;
         }
 
@@ -179,17 +190,23 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().stopScan()) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to stop scan");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
+                    setFailedReason("Failed to stop scan");
             return TestCase.FAIL;
         }
 
         if (ret == TestCase.FAIL) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
+                    setFailedReason("notifyScanSaveResultFinished callback is not invoked");
             return TestCase.FAIL;
         }
 
         Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         if (channels.length <= 0) {
             TLog.e(this, "SCA_NofifyScanSaveResultFinished: Channel list is empty");
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
+                    setFailedReason("Channel list is empty");
             return TestCase.FAIL;
         }
 

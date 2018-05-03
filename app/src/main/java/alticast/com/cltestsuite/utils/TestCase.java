@@ -20,7 +20,7 @@ public class TestCase {
     public static final int SUCCESS = 2;
 
     private String name;
-    private String reason;
+    private String failedReason;
     private int status;
     private int result;
 
@@ -29,7 +29,7 @@ public class TestCase {
         this.name = name;
         this.status = NOT_TEST;
         this.result = NOT_TEST;
-        this.reason = null;
+        this.failedReason = null;
     }
 
     public String getName() {
@@ -52,11 +52,11 @@ public class TestCase {
         this.result = result;
     }
 
-    public String getReason() {
-        return reason;
+    public String getFailedReason() {
+        return failedReason;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setFailedReason(String failedReason) {
+        this.failedReason = failedReason;
     }
 }
