@@ -11,14 +11,8 @@
 
 package alticast.com.cltestsuite.dvr;
 
-import android.app.ProgressDialog;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.alticast.af.builder.RAntennaInfoDiseqc;
 import com.alticast.af.builder.RAntennaInfoLnb;
@@ -29,14 +23,11 @@ import com.alticast.af.builder.RTuneParamSat;
 import com.alticast.af.builder.RTuneTpInfoSat;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
 import af.builder.ScanEventListener;

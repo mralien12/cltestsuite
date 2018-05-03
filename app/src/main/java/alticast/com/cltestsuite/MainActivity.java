@@ -34,6 +34,7 @@ import alticast.com.cltestsuite.utils.TestCase;
 import alticast.com.cltestsuite.utils.TestCaseAdapter;
 
 public class MainActivity extends Activity {
+    private static final int DELAY_UPDATE_UI = 500;   /* miliseconds */
 
     private ListView lvScanTest, lvChannelTest, lvDVRTest, lvEpgTest, lvMediaTest, lvSFTest;
     private Button btnTestAll, btnShowResult, btnExportResult;
@@ -42,7 +43,7 @@ public class MainActivity extends Activity {
     private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrSFTest;
     private int ret;
 
-    private Thread threadScan, threadAllScanTest, threadAllDvrTest;
+    private Thread threadScan, threadAllScanTest, threadAllChannelTest, threadAllDvrTest;
     public static List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
     public static List<TestCase> epgTestCaseList, mediaTestCaseList, sfTestCaseList;
     private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
@@ -85,8 +86,8 @@ public class MainActivity extends Activity {
         lvMediaTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getBaseContext(), MediaPlayerTestActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(getBaseContext(), MediaPlayerTestActivity.class);
+//                startActivity(intent);
             }
         });
     }
@@ -114,14 +115,14 @@ public class MainActivity extends Activity {
                 listTestedTC = new ArrayList<ShowResultActivity>();
 
                 // 1. Scan Test
-                for (TestCase testCase : scanTestCaseList){
-                    if (testCase.getResult() == TestCase.FAIL){
+                for (TestCase testCase : scanTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == TestCase.SUCCESS){
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
@@ -131,14 +132,14 @@ public class MainActivity extends Activity {
                 }
 
                 // 2. Channel List Test
-                for (TestCase testCase : channelTestCaseList){
-                    if (testCase.getResult() == TestCase.FAIL){
+                for (TestCase testCase : channelTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == TestCase.SUCCESS){
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
@@ -148,14 +149,14 @@ public class MainActivity extends Activity {
                 }
 
                 // 3. DVR Test
-                for (TestCase testCase : dvrTestCaseList){
-                    if (testCase.getResult() == TestCase.FAIL){
+                for (TestCase testCase : dvrTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == TestCase.FAIL){
+                    } else if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
@@ -165,14 +166,14 @@ public class MainActivity extends Activity {
                 }
 
                 // 4. EPG Test
-                for (TestCase testCase : epgTestCaseList){
-                    if (testCase.getResult() == TestCase.FAIL){
+                for (TestCase testCase : epgTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == TestCase.SUCCESS){
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
@@ -182,14 +183,14 @@ public class MainActivity extends Activity {
                 }
 
                 // 5. Media Test
-                for (TestCase testCase : mediaTestCaseList){
-                    if (testCase.getResult() == TestCase.FAIL){
+                for (TestCase testCase : mediaTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == TestCase.SUCCESS){
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
@@ -199,14 +200,14 @@ public class MainActivity extends Activity {
                 }
 
                 // 6. Section Filter Test
-                for (TestCase testCase : sfTestCaseList){
-                    if (testCase.getResult() == TestCase.FAIL){
+                for (TestCase testCase : sfTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == TestCase.SUCCESS){
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
@@ -253,57 +254,45 @@ public class MainActivity extends Activity {
                                 }
                             });
 
-                            scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    scanTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            int retNotify = ScanTest.getInstance().SCA_Notify();
-                            scanTestCaseList.get(ScanTest.NOTTITY).setResult(retNotify);
-                            scanTestCaseList.get(ScanTest.NOTTITY).setStatus(TestCase.TEST_DONE);
+                            /* Wait few miliseconds for updating UI */
+                            try {
+                                Thread.sleep(DELAY_UPDATE_UI);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    scanTestAdapter.notifyDataSetChanged();
-                                }
-                            });
+                            for (int testCase = 0; testCase < scanTestCaseList.size(); testCase++) {
+                                int ret = TestCase.FAIL;
+                                scanTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        scanTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
 
-                            scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    scanTestAdapter.notifyDataSetChanged();
+                                switch (testCase) {
+                                    case ScanTest.NOTTITY:
+                                        ret = ScanTest.getInstance().SCA_Notify();
+                                        break;
+                                    case ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH:
+                                        ret = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                                        break;
+                                    case ScanTest.SELECT_CONFLICT_CHANNEL_REGION:
+                                        ret = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
+                                        break;
+                                    default:
                                 }
-                            });
-                            int retNofifySave = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
-                            scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setResult(retNofifySave);
-                            scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    scanTestAdapter.notifyDataSetChanged();
-                                }
-                            });
 
-                            scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    scanTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            int retConflict = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
-                            scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setResult(retConflict);
-                            scanTestCaseList.get(ScanTest.SELECT_CONFLICT_CHANNEL_REGION).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    scanTestAdapter.notifyDataSetChanged();
-                                }
-                            });
+                                scanTestCaseList.get(testCase).setResult(ret);
+                                scanTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        scanTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
                         }
                     });
                     threadAllScanTest.start();
@@ -314,51 +303,67 @@ public class MainActivity extends Activity {
         btnAllChannelTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Thread threadAllChannelTest = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int ret = TestCase.FAIL;
-                        for (int testCase = 0; testCase < channelTestCaseList.size(); testCase++) {
-                            channelTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                channelTestAdapter.notifyDataSetChanged();
-                            }
-                        });
-
-                        for (int testCase = 0; testCase < channelTestCaseList.size(); testCase++) {
-                            channelTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    channelTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-
-                            switch (testCase) {
-                                case ChannelListTest.CHANNEL_LIST_UPDATED:
-                                    ret = ChannelListTest.getInstance().CHL_OnChannelListUpdated();
-                                    break;
-                                case ChannelListTest.CHANNEL_CALLBACK_ON_CHANNEL_DATA_RECEIVED:
-                                    ret = ChannelListTest.getInstance().CHL_ChannelCallbackOnChannelDataReceived();
-                                    break;
-                                default:
-                            }
-
-                            channelTestCaseList.get(testCase).setResult(ret);
-                            channelTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    channelTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        }
+                if (threadAllChannelTest != null) {
+                    if (threadAllChannelTest.isAlive()) {
+                        Toast.makeText(MainActivity.this, "Channel List Test is running...", Toast.LENGTH_LONG).show();
+                        return;
+                    } else {
+                        threadAllChannelTest.start();
                     }
-                });
-                threadAllChannelTest.start();
+                } else {
+                    threadAllChannelTest = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int ret = TestCase.FAIL;
+                            for (int testCase = 0; testCase < channelTestCaseList.size(); testCase++) {
+                                channelTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    channelTestAdapter.notifyDataSetChanged();
+                                }
+                            });
+
+                        /* Wait few miliseconds for updating UI */
+                            try {
+                                Thread.sleep(DELAY_UPDATE_UI);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            for (int testCase = 0; testCase < channelTestCaseList.size(); testCase++) {
+                                channelTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        channelTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
+                                switch (testCase) {
+                                    case ChannelListTest.CHANNEL_LIST_UPDATED:
+                                        ret = ChannelListTest.getInstance().CHL_OnChannelListUpdated();
+                                        break;
+                                    case ChannelListTest.CHANNEL_CALLBACK_ON_CHANNEL_DATA_RECEIVED:
+                                        ret = ChannelListTest.getInstance().CHL_ChannelCallbackOnChannelDataReceived();
+                                        break;
+                                    default:
+                                }
+
+                                channelTestCaseList.get(testCase).setResult(ret);
+                                channelTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        channelTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    threadAllChannelTest.start();
+                }
             }
         });
 
@@ -387,74 +392,48 @@ public class MainActivity extends Activity {
                                     }
                                 }
                             });
+                            /* Wait few miliseconds for updating UI */
+                            try {
+                                Thread.sleep(DELAY_UPDATE_UI);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
-                            dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            int retOnRecordingReceived = DVRTest.getInstance().onRecordingReceived();
-                            dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setResult(retOnRecordingReceived);
-                            dvrTestCaseList.get(DVRTest.ON_RECORDING_RECEIVED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
-                                }
-                            });
+                            for (int testCase = 0; testCase < dvrTestCaseList.size(); testCase++) {
+                                int ret = TestCase.FAIL;
+                                dvrTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dvrTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
 
-                            dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
+                                switch (testCase) {
+                                    case DVRTest.ON_RECORDING_RECEIVED:
+                                        ret = DVRTest.getInstance().onRecordingReceived();
+                                        break;
+                                    case DVRTest.STATE_LISTENER_ON_STATED:
+                                        ret = DVRTest.getInstance().stateListenerOnStated();
+                                        break;
+                                    case DVRTest.STATE_LISTENER_ON_STOPED:
+                                        ret = DVRTest.getInstance().stateListenerOnStoped();
+                                        break;
+                                    case DVRTest.RECORDING_SESSION_CALLBACK:
+                                        ret = DVRTest.getInstance().recordingSessionCallback();
+                                        break;
+                                    default:
                                 }
-                            });
-                            int retStateListenerOnStated = DVRTest.getInstance().stateListenerOnStated();
-                            dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setResult(retStateListenerOnStated);
-                            dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
-                                }
-                            });
 
-                            dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            int retStateListenerOnStoped = DVRTest.getInstance().stateListenerOnStoped();
-                            dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setResult(retStateListenerOnStoped);
-                            dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPED).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-
-                            dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setStatus(TestCase.TEST_RUNNING);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            int retRecordingSessionCallback = DVRTest.getInstance().recordingSessionCallback();
-                            dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setResult(retRecordingSessionCallback);
-                            dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setStatus(TestCase.TEST_DONE);
-                            runOnUiThread( new Runnable() {
-                                @Override
-                                public void run() {
-                                    dvrTestAdapter.notifyDataSetChanged();
-                                }
-                            });
+                                dvrTestCaseList.get(testCase).setResult(ret);
+                                dvrTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dvrTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
                         }
                     });
                     threadAllDvrTest.start();
