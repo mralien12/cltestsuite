@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        addControll();
+        addControl();
         addEvent();
         addListener();
     }
@@ -85,8 +85,8 @@ public class MainActivity extends Activity {
         lvMediaTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getBaseContext(), MediaPlayerTestActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(getBaseContext(), MediaPlayerTestActivity.class);
+//                startActivity(intent);
             }
         });
     }
@@ -493,7 +493,7 @@ public class MainActivity extends Activity {
     private void testAllFunction() {
     }
 
-    private void addControll() {
+    private void addControl() {
         // Add ListView
         arrScanTest = getResources().getStringArray(R.array.scan_test_list);
         arrChannelTest = getResources().getStringArray(R.array.channel_test_list);
