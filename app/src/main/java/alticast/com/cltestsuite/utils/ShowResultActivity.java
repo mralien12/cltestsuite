@@ -43,7 +43,12 @@ public class ShowResultActivity extends Activity implements Serializable {
 
     @Override
     public String toString() {
-        return "Testcase : " + name + '\n' + "Result : " + resultDetail;
+        if (successTestCase == true) {
+            return "Testcase : " + name + '\n' + "Result : SUCCESS";
+        }else
+        {
+            return "Testcase : " + name + '\n' + "Result : FAIL - " + resultDetail;
+        }
     }
 
     public boolean isSuccessTestCase() {
@@ -82,9 +87,9 @@ public class ShowResultActivity extends Activity implements Serializable {
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 TextView textView = (TextView) super.getView(position, convertView, parent);
-
                 int textColor = (showResultActivities.get(position).successTestCase == false) ? R.color.fail_row_background : R.color.success_row_background;
                 textView.setTextColor(ShowResultActivity.this.getResources().getColor(textColor));
+
                 return textView;
             }
         };

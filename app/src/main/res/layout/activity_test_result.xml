@@ -8,12 +8,13 @@
     tools:context=".utils.ShowResultActivity">
 
     <TextView
-        android:textSize="30dp"
-        android:textStyle="bold"
-        android:background="@color/success_row_background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/test_result" />
+        android:background="@color/success_row_background"
+        android:paddingLeft="10dp"
+        android:text="@string/test_result"
+        android:textSize="30dp"
+        android:textStyle="bold" />
 
     <ListView
         android:id="@+id/lsResult"

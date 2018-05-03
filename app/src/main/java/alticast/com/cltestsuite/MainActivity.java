@@ -14,6 +14,7 @@ package alticast.com.cltestsuite;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -123,6 +124,23 @@ public class MainActivity extends Activity {
                     }
                 }
 
+                // 2. Channel List Test
+                for (TestCase testCase : channelTestCaseList){
+                    if (testCase.getResult() == 1){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == 2){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
                 // 3. DVR Test
                 for (TestCase testCase : dvrTestCaseList){
                     if (testCase.getResult() == 1){
@@ -140,7 +158,56 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                listTestedTC.add(showResultActivity);
+                // 4. EPG Test
+                for (TestCase testCase : epgTestCaseList){
+                    if (testCase.getResult() == 1){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == 2){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
+                // 5. Media Test
+                for (TestCase testCase : mediaTestCaseList){
+                    if (testCase.getResult() == 1){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == 2){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
+                // 6. Section Filter Test
+                for (TestCase testCase : sfTestCaseList){
+                    if (testCase.getResult() == 1){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == 2){
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
 
                 Intent intent = new Intent(MainActivity.this, ShowResultActivity.class);
                 intent.putExtra("TestCaseList", (Serializable) listTestedTC);
