@@ -1,6 +1,8 @@
 package alticast.com.cltestsuite.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -48,8 +50,7 @@ public class ShowResultActivity extends Activity implements Serializable {
     public String toString() {
         if (successTestCase == true) {
             return "Testcase : " + name + '\n' + "Result : SUCCESS";
-        }else
-        {
+        } else {
             return "Testcase : " + name + '\n' + "Result : FAIL - " + resultDetail;
         }
     }
@@ -104,14 +105,14 @@ public class ShowResultActivity extends Activity implements Serializable {
 
     private void showSuccessFilter() {
         txtHeader.setText("Success Filter");
+        txtHeader.setBackgroundColor(Color.GREEN);
 
         lsTestCase = new ArrayList<ShowResultActivity>();
         lsTestCase = (List<ShowResultActivity>) getIntent().getSerializableExtra("TestCaseList");
         showResultActivities = new ArrayList<ShowResultActivity>();
 
         if (lsTestCase.size() > 0) {
-            for (ShowResultActivity tc : lsTestCase)
-            {
+            for (ShowResultActivity tc : lsTestCase) {
                 if (tc.successTestCase == true) {
                     showResultActivity = new ShowResultActivity();
                     showResultActivity.setName(tc.getName());
@@ -123,7 +124,7 @@ public class ShowResultActivity extends Activity implements Serializable {
             }
         }
         ListView listView = findViewById(R.id.lsResult);
-        ArrayAdapter adapter = new ArrayAdapter<ShowResultActivity>(ShowResultActivity.this, android.R.layout.simple_list_item_1, showResultActivities){
+        ArrayAdapter adapter = new ArrayAdapter<ShowResultActivity>(ShowResultActivity.this, android.R.layout.simple_list_item_1, showResultActivities) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -135,20 +136,20 @@ public class ShowResultActivity extends Activity implements Serializable {
             }
         };
 
-        Toast.makeText(ShowResultActivity.this, "Success Testcase Size: "+showResultActivities.size(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(ShowResultActivity.this, "Success Testcase Size: " + showResultActivities.size(), Toast.LENGTH_SHORT).show();
         listView.setAdapter(adapter);
     }
 
     private void showFailFilter() {
         txtHeader.setText("Fail Filter");
+        txtHeader.setBackgroundColor(Color.RED);
 
         lsTestCase = new ArrayList<ShowResultActivity>();
         lsTestCase = (List<ShowResultActivity>) getIntent().getSerializableExtra("TestCaseList");
         showResultActivities = new ArrayList<ShowResultActivity>();
 
         if (lsTestCase.size() > 0) {
-            for (ShowResultActivity tc : lsTestCase)
-            {
+            for (ShowResultActivity tc : lsTestCase) {
                 if (tc.successTestCase == false) {
                     showResultActivity = new ShowResultActivity();
                     showResultActivity.setName(tc.getName());
@@ -160,7 +161,7 @@ public class ShowResultActivity extends Activity implements Serializable {
             }
         }
         ListView listView = findViewById(R.id.lsResult);
-        ArrayAdapter adapter = new ArrayAdapter<ShowResultActivity>(ShowResultActivity.this, android.R.layout.simple_list_item_1, showResultActivities){
+        ArrayAdapter adapter = new ArrayAdapter<ShowResultActivity>(ShowResultActivity.this, android.R.layout.simple_list_item_1, showResultActivities) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -172,22 +173,22 @@ public class ShowResultActivity extends Activity implements Serializable {
             }
         };
 
-        Toast.makeText(ShowResultActivity.this, "Fail Testcase Size: "+showResultActivities.size(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(ShowResultActivity.this, "Fail Testcase Size: " + showResultActivities.size(), Toast.LENGTH_SHORT).show();
         listView.setAdapter(adapter);
     }
 
-    private void showAllResults(){
+    private void showAllResults() {
         txtHeader.setText("Test Results");
+        txtHeader.setBackgroundColor(Color.DKGRAY);
 
         lsTestCase = new ArrayList<ShowResultActivity>();
         lsTestCase = (List<ShowResultActivity>) getIntent().getSerializableExtra("TestCaseList");
         showResultActivities = new ArrayList<ShowResultActivity>();
 
-        Toast.makeText(ShowResultActivity.this, "All Testcase Size: "+lsTestCase.size(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(ShowResultActivity.this, "All Testcase Size: " + lsTestCase.size(), Toast.LENGTH_SHORT).show();
 
         if (lsTestCase.size() > 0) {
-            for (ShowResultActivity tc : lsTestCase)
-            {
+            for (ShowResultActivity tc : lsTestCase) {
                 showResultActivity = new ShowResultActivity();
                 showResultActivity.setName(tc.getName());
                 showResultActivity.setResultDetail(tc.getResultDetail());
@@ -197,7 +198,8 @@ public class ShowResultActivity extends Activity implements Serializable {
             }
         }
         ListView listView = findViewById(R.id.lsResult);
-        ArrayAdapter adapter = new ArrayAdapter<ShowResultActivity>(ShowResultActivity.this, android.R.layout.simple_list_item_1, showResultActivities){
+        ArrayAdapter adapter = new ArrayAdapter<ShowResultActivity>(ShowResultActivity.this, android.R.layout.simple_list_item_1, showResultActivities) {
+            @SuppressLint("ResourceAsColor")
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {

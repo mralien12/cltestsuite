@@ -11,7 +11,6 @@
         android:id="@+id/txt_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/success_row_background"
         android:paddingLeft="10dp"
         android:text="@string/test_result"
         android:textSize="30dp"

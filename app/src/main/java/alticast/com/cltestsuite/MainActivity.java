@@ -156,7 +156,7 @@ public class MainActivity extends Activity {
                         showResultActivity.setResultDetail(testCase.getFailedReason());
                         showResultActivity.setSuccessTestCase(false);
                         listTestedTC.add(showResultActivity);
-                    } else if (testCase.getResult() == TestCase.FAIL) {
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
                         showResultActivity.setResultDetail(testCase.getFailedReason());
@@ -325,7 +325,7 @@ public class MainActivity extends Activity {
                                 }
                             });
 
-                        /* Wait few miliseconds for updating UI */
+                            /* Wait few miliseconds for updating UI */
                             try {
                                 Thread.sleep(DELAY_UPDATE_UI);
                             } catch (InterruptedException e) {
@@ -575,8 +575,7 @@ public class MainActivity extends Activity {
     public void testScanEventListener(final int position) {
         if (threadScan != null) {
             if (threadScan.isAlive()) {
-                Toast.makeText(getApplicationContext(), "Wait for current test case finish",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
                 return;
 
             }

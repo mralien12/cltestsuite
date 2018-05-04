@@ -68,11 +68,11 @@ public class DVRTest {
     protected DVRTest() {
     }
 
-    public static synchronized DVRTest getInstance (){
+    public static synchronized DVRTest getInstance() {
         retStart = retStop = TestCase.FAIL;
 
         ScanTest scanTest = ScanTest.getInstance();
-        if (instance == null){
+        if (instance == null) {
             instance = new DVRTest();
 
             recordingManager.getInstance().setStateListener(new RecordingManager.StateListener() {
@@ -94,12 +94,12 @@ public class DVRTest {
     }
 
     // not have idea
-    public int onRecordingReceived(){
+    public int onRecordingReceived() {
         ret = TestCase.FAIL;
         return ret;
     }
 
-    public int stateListenerOnStated(){
+    public int stateListenerOnStated() {
         devices = null;
 
         //add device rootpath
@@ -113,7 +113,7 @@ public class DVRTest {
                 if (line.contains("/mnt/media_rw")) {
                     String[] tokens = line.split(" ");
                     devices = tokens[1];
-                    Log.i(LOGTAG,"rootpath: "+ devices);
+                    Log.i(LOGTAG, "rootpath: " + devices);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -129,7 +129,7 @@ public class DVRTest {
             }
         }
 
-        if (devices!=null) {
+        if (devices != null) {
             recordingManager.getInstance().start(devices + "/");
         }
 
@@ -142,7 +142,7 @@ public class DVRTest {
         return retStart;
     }
 
-    public int stateListenerOnStoped(){
+    public int stateListenerOnStoped() {
         recordingManager.getInstance().stop();
 
         /* Delay few miliseconds for save result*/
@@ -167,7 +167,7 @@ public class DVRTest {
         //
 
         stateListenerOnStated();
-        RecordingManager.getInstance().start(devices+"/");
+        RecordingManager.getInstance().start(devices + "/");
 
         if (channels == null) {
             channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
@@ -182,7 +182,7 @@ public class DVRTest {
                     @Override
                     public void onError(short i) {
                         isTunedSuccess = false;
-                        Log.e(LOGTAG,"onError");
+                        Log.e(LOGTAG, "onError");
                     }
 
                     @Override
@@ -251,13 +251,12 @@ public class DVRTest {
                 if (isTunedSuccess == true && isRecordingStopped == true && isRightTime == true)
                     ret = TestCase.SUCCESS;
             }
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             Log.e(LOGTAG, "Can not catch any programs");
             ret = TestCase.FAIL;
         }
 
-        Log.d(LOGTAG,"isTunedSuccess: "+count+"--isRecordingStarted: "
-                +isRecordingStarted+"--isRecordingStopped: "+isRecordingStopped+"--isTunedSuccess: "+isTunedSuccess);
+        Log.d(LOGTAG, "isTunedSuccess: " + count + "--isRecordingStarted: " + isRecordingStarted + "--isRecordingStopped: " + isRecordingStopped + "--isTunedSuccess: " + isTunedSuccess);
 
         return ret;
     }
@@ -273,7 +272,7 @@ public class DVRTest {
     private boolean retz;
     private ProgressBar pgbScan;
 
-    private RScanParam generateParam(String satName, int lnb_freq, int transponder_freq){
+    private RScanParam generateParam(String satName, int lnb_freq, int transponder_freq) {
         // Generate rScanParam
         RScanParam rScanParam = null;
         List<RTuneParamSat> item = new ArrayList();
@@ -291,7 +290,7 @@ public class DVRTest {
         return rScanParam;
     }
 
-    private void scanSatellite(RScanParam rScanParam){
+    private void scanSatellite(RScanParam rScanParam) {
         final Channel[] channels = null;
         rs = rScanParam;
 
@@ -326,7 +325,7 @@ public class DVRTest {
 
                 final Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
                 final String[] channel_name = new String[channels.length];
-                for (int i = 0;i < channels.length; i++) {
+                for (int i = 0; i < channels.length; i++) {
                     channel_name[i] = channels[i].getName();
                 }
             }
@@ -335,10 +334,10 @@ public class DVRTest {
         thrScan.start();
     }
 
-    public boolean ScanResult(){
+    public boolean ScanResult() {
         boolean result = true;
 
-        RScanParam rScanParam  = null;
+        RScanParam rScanParam = null;
         rScanParam = generateParam(SAT_NAME, LNB_FREQ, FREQ);
         scanSatellite(rScanParam);
 
