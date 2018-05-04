@@ -11,7 +11,6 @@
 
 package alticast.com.cltestsuite.dvr;
 
-import android.util.Log;
 import android.widget.ProgressBar;
 
 import com.alticast.af.builder.RAntennaInfoDiseqc;
@@ -41,13 +40,15 @@ import af.dvr.RecordingSessionCallback;
 import af.epg.Program;
 import af.resource.NoAvailableResourceException;
 import af.resource.ResourceClient;
+import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
+import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
 
 public class DVRTest {
     public static final int ON_RECORDING_RECEIVED = 0;
     public static final int STATE_LISTENER_ON_STATED = 1;
-    public static final int STATE_LISTENER_ON_STOPED = 2;
+    public static final int STATE_LISTENER_ON_STOPPED = 2;
     public static final int RECORDING_SESSION_CALLBACK = 3;
 
     private Channel[] channels;
@@ -63,7 +64,6 @@ public class DVRTest {
     private static int count = 0;
 
     private static RecordingManager recordingManager;
-    private static final String LOGTAG = "DVRTest";
 
     protected DVRTest() {
     }
@@ -113,42 +113,53 @@ public class DVRTest {
                 if (line.contains("/mnt/media_rw")) {
                     String[] tokens = line.split(" ");
                     devices = tokens[1];
-                    Log.i(LOGTAG, "rootpath: " + devices);
+                    TLog.i(this, "rootpath: " + devices);
                 }
             }
         } catch (FileNotFoundException e) {
+            TLog.e(this, "stateListenerOnStated: FileNotFoundException");
+            MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPPED).setFailedReason("File not found");
             e.printStackTrace();
         } catch (IOException e) {
+            TLog.e(this, "stateListenerOnStated: IOException");
+            MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPPED).setFailedReason("IO Exception, Check your USB connection");
             e.printStackTrace();
         } finally {
             if (buf_reader != null) {
                 try {
                     buf_reader.close();
                 } catch (IOException ex) {
+                    TLog.e(this, "stateListenerOnStated: Read Buffer error");
+                    MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPPED).setFailedReason("Read Buffer error");
                 }
             }
         }
 
         if (devices != null) {
             recordingManager.getInstance().start(devices + "/");
+        }else {
+            TLog.e(this, "stateListenerOnStated: Not found storage device");
+            MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setFailedReason("Not found storage device");
         }
 
         /* Delay few miliseconds for save result*/
         try {
             TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
+            TLog.e(this, "stateListenerOnStated: InterruptedException");
             e.printStackTrace();
         }
         return retStart;
     }
 
-    public int stateListenerOnStoped() {
+    public int stateListenerOnStopped() {
         recordingManager.getInstance().stop();
 
         /* Delay few miliseconds for save result*/
         try {
             TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
+            TLog.e(this, "stateListenerOnStopped: InterruptedException");
             e.printStackTrace();
         }
         return retStop;
@@ -182,7 +193,7 @@ public class DVRTest {
                     @Override
                     public void onError(short i) {
                         isTunedSuccess = false;
-                        Log.e(LOGTAG, "onError");
+                        TLog.e(this, "onError");
                     }
 
                     @Override
@@ -226,6 +237,8 @@ public class DVRTest {
             } else {
             }
         } else {
+            TLog.e(this, "recordingSessionCallback: Not have channel");
+            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Not have channel");
         }
 
         try {
@@ -242,7 +255,7 @@ public class DVRTest {
                 if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
                     isRightTime = true;
                 if (!isRightTime) {
-                    Log.e(LOGTAG, "Wrong recording time");
+                    TLog.e(this, "Wrong recording time");
                 }
 
                 recordingSession.release();
@@ -252,11 +265,12 @@ public class DVRTest {
                     ret = TestCase.SUCCESS;
             }
         } catch (NullPointerException e) {
-            Log.e(LOGTAG, "Can not catch any programs");
+            TLog.e(this, "Can not catch any programs");
+            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Can not catch any programs");
             ret = TestCase.FAIL;
         }
 
-        Log.d(LOGTAG, "isTunedSuccess: " + count + "--isRecordingStarted: " + isRecordingStarted + "--isRecordingStopped: " + isRecordingStopped + "--isTunedSuccess: " + isTunedSuccess);
+        TLog.i(this, "isTunedSuccess: " + count + "--isRecordingStarted: " + isRecordingStarted + "--isRecordingStopped: " + isRecordingStopped + "--isTunedSuccess: " + isTunedSuccess);
 
         return ret;
     }

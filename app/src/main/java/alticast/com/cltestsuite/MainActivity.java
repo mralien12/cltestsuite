@@ -416,8 +416,8 @@ public class MainActivity extends Activity {
                                     case DVRTest.STATE_LISTENER_ON_STATED:
                                         ret = DVRTest.getInstance().stateListenerOnStated();
                                         break;
-                                    case DVRTest.STATE_LISTENER_ON_STOPED:
-                                        ret = DVRTest.getInstance().stateListenerOnStoped();
+                                    case DVRTest.STATE_LISTENER_ON_STOPPED:
+                                        ret = DVRTest.getInstance().stateListenerOnStopped();
                                         break;
                                     case DVRTest.RECORDING_SESSION_CALLBACK:
                                         ret = DVRTest.getInstance().recordingSessionCallback();
@@ -688,8 +688,8 @@ public class MainActivity extends Activity {
                     case DVRTest.STATE_LISTENER_ON_STATED:
                         ret = DVRTest.getInstance().stateListenerOnStated();
                         break;
-                    case DVRTest.STATE_LISTENER_ON_STOPED:
-                        ret = DVRTest.getInstance().stateListenerOnStoped();
+                    case DVRTest.STATE_LISTENER_ON_STOPPED:
+                        ret = DVRTest.getInstance().stateListenerOnStopped();
                         break;
                     case DVRTest.RECORDING_SESSION_CALLBACK:
                         ret = DVRTest.getInstance().recordingSessionCallback();
