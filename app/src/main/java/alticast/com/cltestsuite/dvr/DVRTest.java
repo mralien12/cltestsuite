@@ -71,7 +71,6 @@ public class DVRTest {
     public static synchronized DVRTest getInstance() {
         retStart = retStop = TestCase.FAIL;
 
-        ScanTest scanTest = ScanTest.getInstance();
         if (instance == null) {
             instance = new DVRTest();
 
@@ -173,11 +172,9 @@ public class DVRTest {
         isRightTime = false;
         timeChecking = 30;
 
-        //
-        ScanResult();
-        //
-
+        ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
         stateListenerOnStated();
+
         RecordingManager.getInstance().start(devices + "/");
 
         if (channels == null) {
@@ -225,7 +222,8 @@ public class DVRTest {
                 try {
                     recordingSession.tune(currentChannel.getUri());
                 } catch (NoAvailableResourceException e) {
-//                    returnResult = false;
+                    TLog.e(this, "NoAvailableResourceException");
+                    MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Resource's recording not available");
                     e.printStackTrace();
                 }
 
@@ -234,128 +232,53 @@ public class DVRTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                /* Start recording 30s */
+                try {
+                    Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
+                    if (programs.length > 0) {
+                        record = recordingSession.startRecording(programs[0].getProgramUri());
+                        try {
+                            TimeUnit.SECONDS.sleep(timeChecking);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        recordingSession.stopRecording();
+                        if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
+                            isRightTime = true;
+                        if (!isRightTime) {
+                            TLog.e(this, "Wrong recording time");
+                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Wrong recording time");
+                        }
+
+                        recordingSession.release();
+                        RecordingManager.getInstance().stop();
+
+                        if (isTunedSuccess == true && isRecordingStopped == true && isRightTime == true)
+                            ret = TestCase.SUCCESS;
+                    }else {
+                        TLog.e(this, "Can not catch any programs");
+                        MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Can not catch any programs");
+                        ret = TestCase.FAIL;
+                    }
+                } catch (NullPointerException e) {
+                    TLog.e(this, "Null programs, check MediaPlayerTest");
+                    MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Null programs");
+                    ret = TestCase.FAIL;
+                }
+
             } else {
+                TLog.e(this, "recordingSessionCallback: Do not have DVR storage");
+                MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Do not have DVR storage");
             }
         } else {
-            TLog.e(this, "recordingSessionCallback: Not have channel");
-            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Not have channel");
-        }
-
-        try {
-            Program[] programs = currentChannel.getPrograms(1473527700000L, 1473528600000L);
-            if (programs.length > 0) {
-                record = recordingSession.startRecording(programs[0].getProgramUri());
-                try {
-                    TimeUnit.SECONDS.sleep(timeChecking);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                recordingSession.stopRecording();
-                if (timeChecking - 2 <= record.getDuration() && record.getDuration() <= timeChecking + 2)
-                    isRightTime = true;
-                if (!isRightTime) {
-                    TLog.e(this, "Wrong recording time");
-                }
-
-                recordingSession.release();
-                RecordingManager.getInstance().stop();
-
-                if (isTunedSuccess == true && isRecordingStopped == true && isRightTime == true)
-                    ret = TestCase.SUCCESS;
-            }
-        } catch (NullPointerException e) {
-            TLog.e(this, "Can not catch any programs");
-            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Can not catch any programs");
-            ret = TestCase.FAIL;
+            TLog.e(this, "recordingSessionCallback: Do not have channel");
+            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Do not have channel");
         }
 
         TLog.i(this, "isTunedSuccess: " + count + "--isRecordingStarted: " + isRecordingStarted + "--isRecordingStopped: " + isRecordingStopped + "--isTunedSuccess: " + isTunedSuccess);
 
         return ret;
-    }
-
-    // Addition DEMO Scan
-    private static final String SAT_NAME = "ASTRA_1";
-    private static final int LNB_FREQ = 9750;
-    private static final int FREQ = 11362;
-    private static final int SYMBOL_RATE = 22000;
-    private static final int POLARIZATION = 1;
-    private static final int TIMEOUT = 30;
-    private RScanParam rs;
-    private boolean retz;
-    private ProgressBar pgbScan;
-
-    private RScanParam generateParam(String satName, int lnb_freq, int transponder_freq) {
-        // Generate rScanParam
-        RScanParam rScanParam = null;
-        List<RTuneParamSat> item = new ArrayList();
-
-        RAntennaInfoLnb rAntennaInfoLnb = new RAntennaInfoLnb(-1, satName, lnb_freq, 0);
-        RAntennaInfoDiseqc diseqc = new RAntennaInfoDiseqc(-1, satName, 0, 0, 0, 1, 1);
-        List<RTuneTpInfoSat> tpList = new ArrayList();
-        RTuneTpInfoSat rTuneTpInfoSat = new RTuneTpInfoSat(transponder_freq, SYMBOL_RATE, POLARIZATION, 1, 1, 2, 0);
-        tpList.add(rTuneTpInfoSat);
-
-        RTuneParamSat rTuneParamSat = new RTuneParamSat(0, rAntennaInfoLnb, diseqc, tpList);
-        item.add(rTuneParamSat);
-
-        rScanParam = new RScanParam(item, 1, 1, false, 0);
-        return rScanParam;
-    }
-
-    private void scanSatellite(RScanParam rScanParam) {
-        final Channel[] channels = null;
-        rs = rScanParam;
-
-        ScanManager.getInstance().setEventListener(new ScanEventListener() {
-            @Override
-            public void notify(RScanEventObject rScanEventObject) {
-            }
-
-            @Override
-            public void notifyScanSaveResultFinished() {
-            }
-
-            @Override
-            public void selectConflictedChannelRegion(int i, RScanConflictRegion[] rScanConflictRegions) {
-
-            }
-        });
-
-        Thread thrScan = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                retz = ScanManager.getInstance().startScan(rs);
-                if (!retz) {
-                    return;
-                }
-
-                retz = ScanManager.getInstance().stopScan();
-                if (!retz) {
-                    return;
-                }
-
-                final Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
-                final String[] channel_name = new String[channels.length];
-                for (int i = 0; i < channels.length; i++) {
-                    channel_name[i] = channels[i].getName();
-                }
-            }
-        });
-
-        thrScan.start();
-    }
-
-    public boolean ScanResult() {
-        boolean result = true;
-
-        RScanParam rScanParam = null;
-        rScanParam = generateParam(SAT_NAME, LNB_FREQ, FREQ);
-        scanSatellite(rScanParam);
-
-        retz = ScanManager.getInstance().saveResult();
-        return result;
     }
 }
