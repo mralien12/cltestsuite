@@ -712,7 +712,7 @@ public class MainActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        scanTestAdapter.notifyDataSetChanged();
+                        dvrTestAdapter.notifyDataSetChanged();
                     }
                 });
             }
@@ -751,10 +751,10 @@ public class MainActivity extends Activity {
                     }
                 });
                 switch (position) {
+                    case SectionFilterTest.SF_EXCEPTION:
+                        break;
                     case SectionFilterTest.SF_EVENT:
                         ret = SectionFilterTest.getInstance().sectionFitlerEvent();
-                        break;
-                    case SectionFilterTest.SF_EXCEPTION:
                         break;
                     default:
                 }

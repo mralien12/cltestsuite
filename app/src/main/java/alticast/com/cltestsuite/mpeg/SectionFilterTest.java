@@ -39,8 +39,8 @@ import alticast.com.cltestsuite.utils.TestCase;
 
 public class SectionFilterTest {
 
-    public static final int SF_EVENT = 0;
-    public static final int SF_EXCEPTION = 1;
+    public static final int SF_EXCEPTION = 0;
+    public static final int SF_EVENT = 1;
     private static int ret;
 
     private static SectionFilterTest instance = null;
