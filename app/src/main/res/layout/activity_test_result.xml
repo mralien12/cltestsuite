@@ -47,5 +47,6 @@
         android:id="@+id/lsResult"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fadeScrollbars="false"
         android:clickable="false" />
 </LinearLayout>

@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import af.builder.ScanEventListener;
-import af.builder.ScanManager;
 import af.channel.Channel;
 import af.channel.ChannelManager;
 import af.dvr.Recording;
@@ -44,6 +42,7 @@ import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
+import com.alticast.af.dvr.RRecordingSessionCallback;
 
 public class DVRTest {
     public static final int ON_RECORDING_RECEIVED = 0;
@@ -190,7 +189,23 @@ public class DVRTest {
                     @Override
                     public void onError(short i) {
                         isTunedSuccess = false;
-                        TLog.e(this, "onError");
+                        TLog.e(this, "RecordingSessionCallback onError");
+                        if (i == RRecordingSessionCallback.RECORDING_ERROR_UNKNOWN){
+                            TLog.e(this, "Recording error unknown");
+                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("The requested operation cannot be completed due to a undefined problem.");
+                        } else if (i == RRecordingSessionCallback.RECORDING_ERROR_INSUFFICIENT_SPACE){
+                            TLog.e(this, "Recording error insufficient space");
+                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Recording cannot proceed due to insufficient storage space.");
+                        } else if (i == RRecordingSessionCallback.RECORDING_ERROR_NO_AVAILABLE_RESOURCE){
+                            TLog.e(this, "Recording error no available resource");
+                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Recording cannot proceed because a requested recording resource was not able to be allocated.");
+                        } else if (i == RRecordingSessionCallback.RECORDING_ERROR_DISK_ERROR){
+                            TLog.e(this, "Recording error disk error");
+                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Indicates disk error.");
+                        } else if (i == RRecordingSessionCallback.RECORDING_ERROR_WRITE_ERROR){
+                            TLog.e(this, "Recording error write error");
+                             MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Recording error write error");
+                        }
                     }
 
                     @Override
