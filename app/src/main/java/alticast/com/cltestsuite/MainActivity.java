@@ -26,9 +26,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import af.mpeg.section.SectionFilterListener;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
+import alticast.com.cltestsuite.mpeg.SectionFilterTest;
 import alticast.com.cltestsuite.utils.ShowResultActivity;
 import alticast.com.cltestsuite.utils.TestCase;
 import alticast.com.cltestsuite.utils.TestCaseAdapter;
@@ -88,6 +90,13 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                Intent intent = new Intent(getBaseContext(), MediaPlayerTestActivity.class);
 //                startActivity(intent);
+            }
+        });
+
+        lvSFTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                testSfEventListener (position);
             }
         });
     }
@@ -708,7 +717,7 @@ public class MainActivity extends Activity {
                 });
             }
         });
-        Toast.makeText(getApplicationContext(), "Testcase " + arrDVRTest[position], Toast.LENGTH_LONG);
+        Toast.makeText(getApplicationContext(), "Testcase " + arrDVRTest[position], Toast.LENGTH_LONG).show();
 
         dvrTestCaseList.get(position).setStatus(TestCase.NOT_TEST);
         runOnUiThread(new Runnable() {
@@ -718,6 +727,57 @@ public class MainActivity extends Activity {
             }
         });
         threadScan.start();
+    }
 
+
+    public void testSfEventListener(final int position) {
+        if (threadScan != null) {
+            if (threadScan.isAlive()) {
+                Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
+                return;
+
+            }
+        }
+
+        threadScan = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ret = TestCase.FAIL;
+                sfTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfTestAdapter.notifyDataSetChanged();
+                    }
+                });
+                switch (position) {
+                    case SectionFilterTest.SF_EVENT:
+                        ret = SectionFilterTest.getInstance().sectionFitlerEvent();
+                        break;
+                    case SectionFilterTest.SF_EXCEPTION:
+                        break;
+                    default:
+                }
+
+                sfTestCaseList.get(position).setResult(ret);
+                sfTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfTestAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        });
+        Toast.makeText(getApplicationContext(), "Testcase " + arrSFTest[position], Toast.LENGTH_SHORT).show();
+
+        sfTestCaseList.get(position).setStatus(TestCase.NOT_TEST);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                sfTestAdapter.notifyDataSetChanged();
+            }
+        });
+        threadScan.start();
     }
 }
