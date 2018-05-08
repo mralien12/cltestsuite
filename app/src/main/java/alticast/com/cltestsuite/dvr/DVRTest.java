@@ -11,16 +11,6 @@
 
 package alticast.com.cltestsuite.dvr;
 
-import android.widget.ProgressBar;
-
-import com.alticast.af.builder.RAntennaInfoDiseqc;
-import com.alticast.af.builder.RAntennaInfoLnb;
-import com.alticast.af.builder.RScanConflictRegion;
-import com.alticast.af.builder.RScanEventObject;
-import com.alticast.af.builder.RScanParam;
-import com.alticast.af.builder.RTuneParamSat;
-import com.alticast.af.builder.RTuneTpInfoSat;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -61,6 +51,7 @@ public class DVRTest {
     private static int retStart, retStop;
     private static String devices;
     private static int count = 0;
+    private static String errorLog;
 
     private static RecordingManager recordingManager;
 
@@ -69,6 +60,7 @@ public class DVRTest {
 
     public static synchronized DVRTest getInstance() {
         retStart = retStop = TestCase.FAIL;
+        errorLog = null;
 
         if (instance == null) {
             instance = new DVRTest();
@@ -116,11 +108,11 @@ public class DVRTest {
             }
         } catch (FileNotFoundException e) {
             TLog.e(this, "stateListenerOnStated: FileNotFoundException");
-            MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPPED).setFailedReason("File not found");
+            errorLog = "File not found";
             e.printStackTrace();
         } catch (IOException e) {
             TLog.e(this, "stateListenerOnStated: IOException");
-            MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPPED).setFailedReason("IO Exception, Check your USB connection");
+            errorLog = "IO Exception, Check your USB connection";
             e.printStackTrace();
         } finally {
             if (buf_reader != null) {
@@ -128,7 +120,7 @@ public class DVRTest {
                     buf_reader.close();
                 } catch (IOException ex) {
                     TLog.e(this, "stateListenerOnStated: Read Buffer error");
-                    MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STOPPED).setFailedReason("Read Buffer error");
+                    errorLog = "stateListenerOnStated: Read Buffer error";
                 }
             }
         }
@@ -137,7 +129,10 @@ public class DVRTest {
             recordingManager.getInstance().start(devices + "/");
         }else {
             TLog.e(this, "stateListenerOnStated: Not found storage device");
-            MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setFailedReason("Not found storage device");
+            if (errorLog == null)
+            {
+                errorLog = "Not found storage device";
+            }
         }
 
         /* Delay few miliseconds for save result*/
@@ -147,6 +142,8 @@ public class DVRTest {
             TLog.e(this, "stateListenerOnStated: InterruptedException");
             e.printStackTrace();
         }
+
+        MainActivity.dvrTestCaseList.get(DVRTest.STATE_LISTENER_ON_STATED).setFailedReason(errorLog);
         return retStart;
     }
 
@@ -192,19 +189,24 @@ public class DVRTest {
                         TLog.e(this, "RecordingSessionCallback onError");
                         if (i == RRecordingSessionCallback.RECORDING_ERROR_UNKNOWN){
                             TLog.e(this, "Recording error unknown");
-                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("The requested operation cannot be completed due to a undefined problem.");
+                            if (errorLog == null)
+                                errorLog = "The requested operation cannot be completed due to a undefined problem";
                         } else if (i == RRecordingSessionCallback.RECORDING_ERROR_INSUFFICIENT_SPACE){
                             TLog.e(this, "Recording error insufficient space");
-                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Recording cannot proceed due to insufficient storage space.");
+                            if (errorLog == null)
+                                errorLog = "Recording cannot proceed due to insufficient storage space";
                         } else if (i == RRecordingSessionCallback.RECORDING_ERROR_NO_AVAILABLE_RESOURCE){
                             TLog.e(this, "Recording error no available resource");
-                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Recording cannot proceed because a requested recording resource was not able to be allocated.");
+                            if (errorLog == null)
+                                errorLog = "Recording cannot proceed because a requested recording resource was not able to be allocated";
                         } else if (i == RRecordingSessionCallback.RECORDING_ERROR_DISK_ERROR){
                             TLog.e(this, "Recording error disk error");
-                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Indicates disk error.");
+                            if (errorLog == null)
+                                errorLog = "Indicates disk error";
                         } else if (i == RRecordingSessionCallback.RECORDING_ERROR_WRITE_ERROR){
                             TLog.e(this, "Recording error write error");
-                             MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Recording error write error");
+                            if (errorLog == null)
+                                errorLog = "Recording error write error";
                         }
                     }
 
@@ -238,7 +240,8 @@ public class DVRTest {
                     recordingSession.tune(currentChannel.getUri());
                 } catch (NoAvailableResourceException e) {
                     TLog.e(this, "NoAvailableResourceException");
-                    MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Resource's recording not available");
+                    if (errorLog == null)
+                        errorLog = "Resource's recording not available";
                     e.printStackTrace();
                 }
 
@@ -264,7 +267,8 @@ public class DVRTest {
                             isRightTime = true;
                         if (!isRightTime) {
                             TLog.e(this, "Wrong recording time");
-                            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Wrong recording time");
+                            if (errorLog == null)
+                                errorLog = "Wrong recording time";
                         }
 
                         recordingSession.release();
@@ -274,25 +278,29 @@ public class DVRTest {
                             ret = TestCase.SUCCESS;
                     }else {
                         TLog.e(this, "Can not catch any programs");
-                        MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Can not catch any programs");
+                        if (errorLog == null)
+                            errorLog = "Can not catch any programs";
                         ret = TestCase.FAIL;
                     }
                 } catch (NullPointerException e) {
                     TLog.e(this, "Null programs, check MediaPlayerTest");
-                    MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Null programs");
+                    if (errorLog == null)
+                        errorLog = "Null programs";
                     ret = TestCase.FAIL;
                 }
 
             } else {
                 TLog.e(this, "recordingSessionCallback: Do not have DVR storage");
-                MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Do not have DVR storage");
+                if (errorLog == null)
+                    errorLog = "Do not have DVR storage";
             }
         } else {
             TLog.e(this, "recordingSessionCallback: Do not have channel");
-            MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason("Do not have channel");
+            errorLog = "Do not have channel";
         }
 
         TLog.i(this, "isTunedSuccess: " + count + "--isRecordingStarted: " + isRecordingStarted + "--isRecordingStopped: " + isRecordingStopped + "--isTunedSuccess: " + isTunedSuccess);
+        MainActivity.dvrTestCaseList.get(DVRTest.RECORDING_SESSION_CALLBACK).setFailedReason(errorLog);
 
         return ret;
     }
