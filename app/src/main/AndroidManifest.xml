@@ -30,7 +30,9 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".utils.ShowResultActivity"></activity>
+        <activity android:name=".utils.ShowResultActivity" />
+        <activity android:name=".media.ChannelPlayerTVStreamLiveTestActivity" />
+        <activity android:name=".media.ChannelPlayerTVStreamTSRTestActivity" />
     </application>
 
 </manifest>

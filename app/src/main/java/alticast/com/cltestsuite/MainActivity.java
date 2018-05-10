@@ -26,10 +26,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import af.mpeg.section.SectionFilterListener;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
+import alticast.com.cltestsuite.media.ChannelPlayerTVStreamLiveTestActivity;
+import alticast.com.cltestsuite.media.ChannelPlayerTVStreamTSRTestActivity;
+import alticast.com.cltestsuite.media.MediaTest;
 import alticast.com.cltestsuite.mpeg.SectionFilterTest;
 import alticast.com.cltestsuite.utils.ShowResultActivity;
 import alticast.com.cltestsuite.utils.TestCase;
@@ -38,18 +40,18 @@ import alticast.com.cltestsuite.utils.TestCaseAdapter;
 public class MainActivity extends Activity {
     private static final int DELAY_UPDATE_UI = 500;   /* miliseconds */
 
-    private ListView lvScanTest, lvChannelTest, lvDVRTest, lvEpgTest, lvMediaTest, lvSFTest;
+    private ListView lvScanTest, lvChannelTest, lvDVRTest, lvEpgTest, lvMediaTest, lvMediaEventListenerTest, lvSFTest;
     private Button btnTestAll, btnShowResult, btnExportResult;
     private Button btnAllScanTest, btnAllChannelTest, btnAllDvrTest, btnAllEpgTest, btnAllMediaTest, btnAllSfTest;
 
-    private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrSFTest;
+    private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrMediaEventListenerTest, arrSFTest;
     private int ret;
 
     private Thread threadScan, threadAllScanTest, threadAllChannelTest, threadAllDvrTest;
     public static List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
-    public static List<TestCase> epgTestCaseList, mediaTestCaseList, sfTestCaseList;
+    public static List<TestCase> epgTestCaseList, mediaTestCaseList, mediaEventListenerTestCaseList, sfTestCaseList;
     private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
-    private TestCaseAdapter epgTestAdapter, mediaTestAdaper, sfTestAdapter;
+    private TestCaseAdapter epgTestAdapter, mediaTestAdaper, mediaEventListenerTestAdapter, sfTestAdapter;
     private List<ShowResultActivity> listTestedTC;
     private ShowResultActivity showResultActivity;
 
@@ -88,8 +90,13 @@ public class MainActivity extends Activity {
         lvMediaTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Intent intent = new Intent(getBaseContext(), MediaPlayerTestActivity.class);
-//                startActivity(intent);
+                testMediaListener(position);
+            }
+        });
+
+        lvMediaEventListenerTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             }
         });
 
@@ -108,6 +115,7 @@ public class MainActivity extends Activity {
         ListUtils.setDynamicHeight(lvDVRTest);
         ListUtils.setDynamicHeight(lvEpgTest);
         ListUtils.setDynamicHeight(lvMediaTest);
+        ListUtils.setDynamicHeight(lvMediaEventListenerTest);
         ListUtils.setDynamicHeight(lvSFTest);
 
         // Top Button Event
@@ -488,6 +496,7 @@ public class MainActivity extends Activity {
         arrDVRTest = getResources().getStringArray(R.array.dvr_test_list);
         arrEPGTest = getResources().getStringArray(R.array.epg_test_list);
         arrMediaTest = getResources().getStringArray(R.array.media_test_list);
+        arrMediaEventListenerTest = getResources().getStringArray(R.array.media_event_listener_test);
         arrSFTest = getResources().getStringArray(R.array.sf_test_list);
 
         lvScanTest = findViewById(R.id.scan_test_list_view);
@@ -495,6 +504,7 @@ public class MainActivity extends Activity {
         lvDVRTest = findViewById(R.id.dvr_test_list_view);
         lvEpgTest = findViewById(R.id.epg_test_list_view);
         lvMediaTest = findViewById(R.id.media_test_list_view);
+        lvMediaEventListenerTest = findViewById(R.id.media_event_listener_test_list_view);
         lvSFTest = findViewById(R.id.sf_test_list_view);
 
         /* Add test case for scan testsuite */
@@ -537,6 +547,14 @@ public class MainActivity extends Activity {
         }
         mediaTestAdaper = new TestCaseAdapter(this, mediaTestCaseList);
         lvMediaTest.setAdapter(mediaTestAdaper);
+
+        /* Add test case for media event listener testsuite */
+        mediaEventListenerTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrMediaEventListenerTest.length; testCase++) {
+            mediaEventListenerTestCaseList.add(new TestCase(arrMediaEventListenerTest[testCase]));
+        }
+        mediaEventListenerTestAdapter = new TestCaseAdapter(this, mediaEventListenerTestCaseList);
+        lvMediaEventListenerTest.setAdapter(mediaEventListenerTestAdapter);
 
         /* Add test case for SF testsuite */
         sfTestCaseList = new ArrayList<TestCase>();
@@ -729,6 +747,20 @@ public class MainActivity extends Activity {
         threadScan.start();
     }
 
+    public void testMediaListener(final int position) {
+        Intent intent;
+        switch (position) {
+            case MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE:
+                intent = new Intent(getBaseContext(), ChannelPlayerTVStreamLiveTestActivity.class);
+                startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE_REQUEST_CODE);
+                break;
+            case MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR:
+                intent = new Intent(getBaseContext(), ChannelPlayerTVStreamTSRTestActivity.class);
+                startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE);
+                break;
+            default:
+        }
+    }
 
     public void testSfEventListener(final int position) {
         if (threadScan != null) {
@@ -779,5 +811,18 @@ public class MainActivity extends Activity {
             }
         });
         threadScan.start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE_REQUEST_CODE) {
+            int result = data.getIntExtra("RESULT", TestCase.NOT_TEST);
+
+            mediaTestCaseList.get(MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE).setResult(result);
+            mediaTestCaseList.get(MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE).setStatus(TestCase.TEST_DONE);
+            mediaTestAdaper.notifyDataSetChanged();
+
+        }
     }
 }
