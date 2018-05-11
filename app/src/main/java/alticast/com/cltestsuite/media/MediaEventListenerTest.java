@@ -46,17 +46,17 @@ public class MediaEventListenerTest {
             mediaPlayer.setEventListener(new MediaEventListener() {
                 @Override
                 public void onError(int i, String s) {
-                    TLog.i(this, "onError");
+
                 }
 
                 @Override
                 public void onPrepared() {
-                    TLog.i(this, "onPrepared");
+
                 }
 
                 @Override
                 public void onStopped() {
-                    TLog.i(this, "onStopped");
+
                 }
 
                 @Override
@@ -66,8 +66,7 @@ public class MediaEventListenerTest {
 
                 @Override
                 public void onBeginning() {
-                    TLog.i(this, "onBeginning");
-                    ret = TestCase.SUCCESS;
+
                 }
 
                 @Override
@@ -86,32 +85,7 @@ public class MediaEventListenerTest {
                 }
 
                 @Override
-                public void onSubtitleDisplay(int i, int i1) {
-
-                }
-
-                @Override
-                public void onSubtitleClear() {
-
-                }
-
-                @Override
-                public void onSubtitleImage(int i, int i1, int i2, int i3, int i4, byte[] bytes) {
-
-                }
-
-                @Override
-                public void onSubtitleUpdate() {
-
-                }
-
-                @Override
-                public void onSubtitle(boolean b, SubtitleInfo[] subtitleInfos) {
-
-                }
-
-                @Override
-                public void onTeletext(boolean b, TeletextInfo[] teletextInfos) {
+                public void onAudioTrack(MediaPlayer.AudioTrack[] audioTracks) {
 
                 }
             });

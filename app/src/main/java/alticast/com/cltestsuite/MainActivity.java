@@ -29,6 +29,7 @@ import java.util.List;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
+import alticast.com.cltestsuite.media.ChannelEventListener;
 import alticast.com.cltestsuite.media.ChannelPlayerTVStreamLiveTestActivity;
 import alticast.com.cltestsuite.media.ChannelPlayerTVStreamTSRTestActivity;
 import alticast.com.cltestsuite.media.MediaTest;
@@ -48,6 +49,7 @@ public class MainActivity extends Activity {
     private int ret;
 
     private Thread threadScan, threadAllScanTest, threadAllChannelTest, threadAllDvrTest;
+    private Thread threadChannelList, threadMediaTest;
     public static List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
     public static List<TestCase> epgTestCaseList, mediaTestCaseList, mediaEventListenerTestCaseList, sfTestCaseList;
     private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
@@ -611,7 +613,7 @@ public class MainActivity extends Activity {
         threadScan = new Thread(new Runnable() {
             @Override
             public void run() {
-                ret = TestCase.FAIL;
+                int ret = TestCase.FAIL;
                 scanTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
                 runOnUiThread(new Runnable() {
                     @Override
@@ -655,10 +657,18 @@ public class MainActivity extends Activity {
     }
 
     public void testChannelListListener(final int position) {
-        ret = TestCase.FAIL;
-        Thread thread = new Thread(new Runnable() {
+        if (threadChannelList != null) {
+            if (threadChannelList.isAlive()) {
+                Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
+                return;
+
+            }
+        }
+
+        threadChannelList = new Thread(new Runnable() {
             @Override
             public void run() {
+                int ret = TestCase.FAIL;
                 channelTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
                 runOnUiThread(new Runnable() {
                     @Override
@@ -685,7 +695,7 @@ public class MainActivity extends Activity {
                 });
             }
         });
-        thread.start();
+        threadChannelList.start();
 
     }
 
@@ -758,6 +768,48 @@ public class MainActivity extends Activity {
                 intent = new Intent(getBaseContext(), ChannelPlayerTVStreamTSRTestActivity.class);
                 startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE);
                 break;
+            case MediaTest.CHANNEL_EVENT_LISTENER:
+                if (threadMediaTest != null) {
+                    if (threadMediaTest.isAlive()) {
+                        Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+
+                threadMediaTest = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int ret = TestCase.FAIL;
+                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.NOT_TEST);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mediaTestAdaper.notifyDataSetChanged();
+                            }
+                        });
+
+                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_RUNNING);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mediaTestAdaper.notifyDataSetChanged();
+                            }
+                        });
+                        ret = ChannelEventListener.getInstance(getBaseContext()).onChannelEvent();
+
+                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setResult(ret);
+                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_DONE);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mediaTestAdaper.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                });
+                threadMediaTest.start();
+                break;
             default:
         }
     }
@@ -767,7 +819,6 @@ public class MainActivity extends Activity {
             if (threadScan.isAlive()) {
                 Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
                 return;
-
             }
         }
 

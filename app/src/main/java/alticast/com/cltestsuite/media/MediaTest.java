@@ -13,6 +13,7 @@ package alticast.com.cltestsuite.media;
 public class MediaTest {
     public static final int CHANNEL_PLAYER_TVSTREAM_LIVE = 0;
     public static final int CHANNEL_PLAYER_TVSTREAM_TSR = 1;
+    public static final int CHANNEL_EVENT_LISTENER = 2;
 
     public static final int CHANNEL_PLAYER_TVSTREAM_LIVE_REQUEST_CODE = 100;
     public static final int CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE = 101;

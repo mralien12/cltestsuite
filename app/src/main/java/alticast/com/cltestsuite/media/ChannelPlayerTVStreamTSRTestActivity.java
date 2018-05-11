@@ -16,13 +16,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import af.channel.Channel;
 import af.channel.ChannelManager;
 import af.media.ChannelEventListener;
 import af.media.ChannelPlayer;
-import af.media.MediaEventListener;
+import af.media.LiveEventListener;
+import af.media.MediaPlayer;
 import af.media.MediaPlayerFactory;
 import af.media.VideoPlaneControl;
 import af.resource.NoAvailableResourceException;
@@ -59,47 +59,7 @@ public class ChannelPlayerTVStreamTSRTestActivity extends Activity {
                     }
                 });
 
-        channelPlayer.setEventListener(new MediaEventListener() {
-            @Override
-            public void onError(int i, String s) {
-                TLog.e(ChannelPlayerTVStreamTSRTestActivity.this, "onError");
-            }
-
-            @Override
-            public void onPrepared() {
-                TLog.i(ChannelPlayerTVStreamTSRTestActivity.this, "onPrepared");
-            }
-
-            @Override
-            public void onStopped() {
-                TLog.i(ChannelPlayerTVStreamTSRTestActivity.this, "onStopped");
-            }
-
-            @Override
-            public void onCompletion() {
-
-            }
-
-            @Override
-            public void onBeginning() {
-                TLog.i(ChannelPlayerTVStreamTSRTestActivity.this, "onBeginning");
-            }
-
-            @Override
-            public void onRateChanged(float v) {
-                TLog.i(ChannelPlayerTVStreamTSRTestActivity.this, "onRateChanged");
-            }
-
-            @Override
-            public void onBufferingUpdate(int i) {
-
-            }
-
-            @Override
-            public void onMessage(String s, String s1) {
-
-            }
-
+        channelPlayer.setEventListener(new LiveEventListener() {
             @Override
             public void onSubtitleDisplay(int i, int i1) {
 
@@ -127,6 +87,51 @@ public class ChannelPlayerTVStreamTSRTestActivity extends Activity {
 
             @Override
             public void onTeletext(boolean b, TeletextInfo[] teletextInfos) {
+
+            }
+
+            @Override
+            public void onError(int i, String s) {
+
+            }
+
+            @Override
+            public void onPrepared() {
+
+            }
+
+            @Override
+            public void onStopped() {
+
+            }
+
+            @Override
+            public void onCompletion() {
+
+            }
+
+            @Override
+            public void onBeginning() {
+
+            }
+
+            @Override
+            public void onRateChanged(float v) {
+
+            }
+
+            @Override
+            public void onBufferingUpdate(int i) {
+
+            }
+
+            @Override
+            public void onMessage(String s, String s1) {
+
+            }
+
+            @Override
+            public void onAudioTrack(MediaPlayer.AudioTrack[] audioTracks) {
 
             }
         });
