@@ -1,12 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/rootView">
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="CL Test Suite" />
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:text="@string/header" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_test_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_test_all" />
+
+        <Button
+            android:id="@+id/btn_show_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_show_result" />
+
+        <Button
+            android:id="@+id/btn_export_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_export_result" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fadeScrollbars="false"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="5dp"
+            android:background="@drawable/state_selector"
+            android:orientation="vertical">
+
+            //1.Scan Test
+            <Button
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_all_scan_test"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/scan_test"
+                android:gravity="left"
+                android:textSize="@dimen/list_header_size" />
+
+            <ListView
+                android:id="@+id/scan_test_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
+
+            //2.Channel List Test
+            <Button
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_all_channel_test"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/channel_test"
+                android:gravity="left" />
+
+            <ListView
+                android:id="@+id/channel_test_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
+
+            //3.DVR Test
+            <Button
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_all_dvr_test"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/dvr_test"
+                android:gravity="left" />
+
+            <ListView
+                android:id="@+id/dvr_test_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
+
+            //4.EPG Test
+            <Button
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_all_epg_test"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/epg_test"
+                android:gravity="left" />
+
+            <ListView
+                android:id="@+id/epg_test_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
+
+            //5.Media Test
+            <Button
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_all_media_test"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/media_test"
+                android:gravity="left" />
+
+            <ListView
+                android:id="@+id/media_test_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
+
+            // Media Event Listener Test
+            <Button
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/media_event_listener_button"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/media_listener_test"
+                android:gravity="left" />
+
+            <ListView
+                android:id="@+id/media_event_listener_test_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
+
+            //6.Section Filter Test
+            <Button
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_all_sf_test"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/sf_test"
+                android:gravity="left" />
+
+            <ListView
+                android:id="@+id/sf_test_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector"/>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
