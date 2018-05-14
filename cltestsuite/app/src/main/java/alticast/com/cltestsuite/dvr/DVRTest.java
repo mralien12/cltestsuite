@@ -39,11 +39,11 @@ public class DVRTest {
     public static final int STATE_LISTENER_ON_STATED = 1;
     public static final int STATE_LISTENER_ON_STOPPED = 2;
     public static final int RECORDING_SESSION_CALLBACK = 3;
+    public static int timeChecking = 30;
 
     private Channel[] channels;
     private Channel currentChannel;
     private RecordingSession recordingSession;
-    private int timeChecking;
     private static boolean isTunedSuccess, isRecordingStopped, isRecordingStarted, isRightTime;
     private Recording record;
     private static DVRTest instance = null;
@@ -166,7 +166,6 @@ public class DVRTest {
         isRecordingStopped = false;
         isRecordingStarted = false;
         isRightTime = false;
-        timeChecking = 30;
 
         ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
         stateListenerOnStated();

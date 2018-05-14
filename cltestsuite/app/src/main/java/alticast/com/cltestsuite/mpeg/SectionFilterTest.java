@@ -31,6 +31,7 @@ import af.mpeg.section.SectionFilterGroup;
 import af.mpeg.section.SectionFilterListener;
 import af.mpeg.section.TableSectionFilter;
 import af.mpeg.section.TimeOutEvent;
+import af.mpeg.section.VersionChangeDetectedEvent;
 import af.resource.NoAvailableResourceException;
 import af.resource.ResourceClient;
 import alticast.com.cltestsuite.MainActivity;
@@ -59,8 +60,10 @@ public class SectionFilterTest {
     }
 
     public static synchronized SectionFilterTest getInstance () {
+
+        errorLog = null;
+
         if (instance == null) {
-            errorLog = null;
             instance = new SectionFilterTest();
 
             sectionFilterGroup = new SectionFilterGroup(NUMBER_OF_SECTION_FILTER);
@@ -118,7 +121,14 @@ public class SectionFilterTest {
         return instance;
     }
 
-    public int sectionFitlerEvent (){
+    public int sectionFilterException (){
+        ret = TestCase.FAIL;
+
+
+        return ret;
+    }
+
+    public int sectionFilterEvent (){
         ret = TestCase.FAIL;
 
         if (errorLog == null) {
@@ -138,10 +148,14 @@ public class SectionFilterTest {
                     } else if(sectionFilterEvent instanceof IncompleteFilteringEvent) {
                         TLog.i(this, "Filter parameters is incorrect");
                         errorLog = "Filter parameters is incorrect";
-                    } else if (sectionFilterEvent instanceof SectionAvailableEvent) {
-                        TLog.i(this, "Section filter operations is successful. do nothing!!");
-                        errorLog = "Section filter operations is successful. do nothing!!";
-                    } else if (sectionFilterEvent instanceof EndOfFilteringEvent) {
+                    } else if (sectionFilterEvent instanceof VersionChangeDetectedEvent) {
+                        TLog.i(this, "Section filter operations is different from earlier sections!!");
+                        errorLog = "Section filter operations is different from earlier sections!!";
+                    } else if(sectionFilterEvent instanceof SectionAvailableEvent){
+                        TLog.i(this, "Section filter operations is successful!!");
+                        errorLog = "Section filter operations is successful!!";
+                    }
+                    else if (sectionFilterEvent instanceof EndOfFilteringEvent) {
                         TLog.i(this, "Section filter operations is EndOfFilteringEvent");
                         errorLog = "Section filter operations is EndOfFilteringEvent";
 
@@ -230,6 +244,9 @@ public class SectionFilterTest {
         } else {
             MainActivity.sfTestCaseList.get(SF_EVENT).setFailedReason(errorLog);
         }
+
+        if (errorLog == null)
+            ret = TestCase.SUCCESS;
         return ret;
     }
 }

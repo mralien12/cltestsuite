@@ -180,13 +180,46 @@
                 android:text="@string/sf_test"
                 android:gravity="left" />
 
+            <Button
+                android:drawableLeft="@drawable/ic_subject_black_24dp"
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_sf_event_test"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/sf_event_test"
+                android:gravity="left" />
+
             <ListView
-                android:id="@+id/sf_test_list_view"
+                android:clickable="false"
+                android:id="@+id/sf_event_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:divider="@drawable/list_devider"
                 android:dividerHeight="1dp"
-                android:listSelector="@drawable/state_selector"/>
+                android:listSelector="@drawable/state_selector">
+            </ListView>
+
+            <Button
+                android:drawableLeft="@drawable/ic_subject_black_24dp"
+                android:backgroundTint="@color/background_gray"
+                android:id="@+id/btn_sf_exception_test"
+                android:textSize="@dimen/list_header_size"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:text="@string/sf_exception_test"
+                android:gravity="left" />
+            <ListView
+                android:clickable="false"
+                android:id="@+id/sf_exception_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_devider"
+                android:dividerHeight="1dp"
+                android:listSelector="@drawable/state_selector">
+            </ListView>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

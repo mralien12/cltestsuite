@@ -21,6 +21,8 @@
     <string name="media_test">Media Test</string>
     <string name="media_listener_test">Media Event Listener Test</string>
     <string name="sf_test">Section Filter Test</string>
+    <string name="sf_event_test"> A. Section Filter Event Test</string>
+    <string name="sf_exception_test"> B. Section Filter Exception Test</string>
     <string name="test_result">Test Results</string>
 
     <!--When you add a new test case, please add a corresponding final variable in ScanTest.java-->
@@ -63,5 +65,21 @@
     <string-array name="sf_test_list">
         <item>1.SectionFilterException</item>
         <item>2.SectionFilterEvent</item>
+    </string-array>
+
+    <string-array name="sf_event_list">
+        <item>1.TimeOutEvent</item>
+        <item>2.IncompleteFilteringEvent</item>
+        <item>3.VersionChangeDetectedEvent</item>
+        <item>4.SectionAvailableEvent</item>
+        <item>5.EndOfFilteringEvent</item>
+    </string-array>
+
+    <string-array name="sf_exception_list">
+        <item>1.FilterResourceException</item>
+        <item>2.IllegalFilterDefinitionException</item>
+        <item>3.ConnectionLostException</item>
+        <item>4.InvalidSourceException</item>
+        <item>5.NoDataAvailableException</item>
     </string-array>
 </resources>
