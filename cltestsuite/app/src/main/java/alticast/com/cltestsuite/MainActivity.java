@@ -214,8 +214,25 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                // 5. Media Test
+                // 5.1 Media Test
                 for (TestCase testCase : mediaTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
+                // 5.2 Media Event Listener Test
+                for (TestCase testCase : mediaEventListenerTestCaseList) {
                     if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
