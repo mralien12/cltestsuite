@@ -14,6 +14,7 @@ package alticast.com.cltestsuite;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -29,9 +30,10 @@ import java.util.List;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
-import alticast.com.cltestsuite.media.ChannelEventListener;
+import alticast.com.cltestsuite.media.ChannelEventListenerTest;
 import alticast.com.cltestsuite.media.ChannelPlayerTVStreamLiveTestActivity;
 import alticast.com.cltestsuite.media.ChannelPlayerTVStreamTSRTestActivity;
+import alticast.com.cltestsuite.media.MediaEventListenerTest;
 import alticast.com.cltestsuite.media.MediaTest;
 import alticast.com.cltestsuite.mpeg.SectionFilterTest;
 import alticast.com.cltestsuite.utils.ShowResultActivity;
@@ -45,12 +47,13 @@ public class MainActivity extends Activity {
     private Button btnTestAll, btnShowResult, btnExportResult;
     private Button btnAllScanTest, btnAllChannelTest, btnAllDvrTest, btnAllEpgTest, btnAllMediaTest, btnAllSfTest;
     private Button btnSFEventTest, btnSFExceptionTest;
+    private Button btnAllMediaEventListenerTest;
 
     private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrMediaEventListenerTest, arrSFTest, arrSFEventTest, arrSFExceptionTest;
     private int ret;
 
     private Thread threadScan, threadAllScanTest, threadAllChannelTest, threadAllDvrTest;
-    private Thread threadChannelList, threadMediaTest;
+    private Thread threadChannelList, threadMediaTest, threadMediaEventListenerTest, threadAllMediaEventListenerTest;
     public static List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
     public static List<TestCase> epgTestCaseList, mediaTestCaseList, mediaEventListenerTestCaseList, sfTestCaseList, sfEventTestCaseList, sfExceptionTestCaseList;
     private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
@@ -93,13 +96,14 @@ public class MainActivity extends Activity {
         lvMediaTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                testMediaListener(position);
+                testMedia(position);
             }
         });
 
         lvMediaEventListenerTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                testMediaEventListener(position);
             }
         });
 
@@ -270,7 +274,6 @@ public class MainActivity extends Activity {
         btnExportResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
             }
         });
 
@@ -503,7 +506,91 @@ public class MainActivity extends Activity {
 
             }
         });
+
+        btnAllMediaEventListenerTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (threadAllMediaEventListenerTest != null) {
+                    if (threadAllMediaEventListenerTest.isAlive()) {
+                        Toast.makeText(MainActivity.this, "Media Event Listener Test is running...", Toast.LENGTH_LONG).show();
+                        return;
+                    } else {
+                        threadAllMediaEventListenerTest.start();
+                    }
+                } else {
+                    threadAllMediaEventListenerTest = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int ret = TestCase.FAIL;
+                            for (int testCase = 0; testCase < mediaEventListenerTestCaseList.size(); testCase++) {
+                                mediaEventListenerTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mediaEventListenerTestAdapter.notifyDataSetChanged();
+                                }
+                            });
+
+                            /* Wait few miliseconds for updating UI */
+                            try {
+                                Thread.sleep(DELAY_UPDATE_UI);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            for (int testCase = 0; testCase < mediaEventListenerTestCaseList.size(); testCase++) {
+                                mediaEventListenerTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mediaEventListenerTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
+                                switch (testCase) {
+                                    case MediaEventListenerTest.ON_BEGINNING:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onBeginingTest();
+                                        break;
+                                    case MediaEventListenerTest.ON_COMPLETION:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onCompletion();
+                                        break;
+                                    case MediaEventListenerTest.ON_ERROR:
+                                        try {
+                                            ret = MediaEventListenerTest.getInstance(getBaseContext()).onError();
+                                        } catch (RemoteException e) {
+                                            e.printStackTrace();
+                                        }
+                                        break;
+                                    case MediaEventListenerTest.ON_PREPARED:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onPrepared();
+                                        break;
+                                    case MediaEventListenerTest.ON_RATED_CHANGE:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onRateChanged();
+                                        break;
+                                    case MediaEventListenerTest.ON_STOPPED:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onStopped();
+                                        break;
+                                    default:
+                                }
+                                mediaEventListenerTestCaseList.get(testCase).setResult(ret);
+                                mediaEventListenerTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mediaEventListenerTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
+
+                        }
+                    });
+                    threadAllMediaEventListenerTest.start();
+                }
+            }
+        });
     }
+
 
     private void testAllFunction() {
     }
@@ -607,6 +694,7 @@ public class MainActivity extends Activity {
         btnAllDvrTest = findViewById(R.id.btn_all_dvr_test);
         btnAllEpgTest = findViewById(R.id.btn_all_epg_test);
         btnAllMediaTest = findViewById(R.id.btn_all_media_test);
+        btnAllMediaEventListenerTest = findViewById(R.id.all_media_event_listener_button);
         btnAllSfTest = findViewById(R.id.btn_all_sf_test);
         btnSFEventTest = findViewById(R.id.btn_sf_event_test);
         btnSFExceptionTest = findViewById(R.id.btn_sf_exception_test);
@@ -777,10 +865,9 @@ public class MainActivity extends Activity {
                 });
             }
         });
-        if (position == DVRTest.RECORDING_SESSION_CALLBACK)
-        {
+        if (position == DVRTest.RECORDING_SESSION_CALLBACK) {
             Toast.makeText(getApplicationContext(), "Testcase " + arrDVRTest[position] + " recording in: " + DVRTest.timeChecking + "s", Toast.LENGTH_LONG).show();
-        }else {
+        } else {
             Toast.makeText(getApplicationContext(), "Testcase " + arrDVRTest[position], Toast.LENGTH_LONG).show();
         }
 
@@ -794,7 +881,7 @@ public class MainActivity extends Activity {
         threadScan.start();
     }
 
-    public void testMediaListener(final int position) {
+    public void testMedia(final int position) {
         Intent intent;
         switch (position) {
             case MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE:
@@ -817,13 +904,6 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         int ret = TestCase.FAIL;
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.NOT_TEST);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaTestAdapter.notifyDataSetChanged();
-                            }
-                        });
 
                         mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_RUNNING);
 
@@ -833,7 +913,7 @@ public class MainActivity extends Activity {
                                 mediaTestAdapter.notifyDataSetChanged();
                             }
                         });
-                        ret = ChannelEventListener.getInstance(getBaseContext()).onChannelEvent();
+                        ret = ChannelEventListenerTest.getInstance(getBaseContext()).onChannelEvent();
 
                         mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setResult(ret);
                         mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_DONE);
@@ -849,6 +929,68 @@ public class MainActivity extends Activity {
                 break;
             default:
         }
+    }
+
+    public void testMediaEventListener(final int position) {
+        if (threadMediaEventListenerTest != null) {
+            if (threadMediaEventListenerTest.isAlive()) {
+                Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        threadMediaEventListenerTest = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int ret = TestCase.FAIL;
+
+                mediaEventListenerTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mediaEventListenerTestAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                switch (position) {
+                    case MediaEventListenerTest.ON_BEGINNING:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onBeginingTest();
+                        break;
+                    case MediaEventListenerTest.ON_COMPLETION:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onCompletion();
+                        break;
+                    case MediaEventListenerTest.ON_ERROR:
+                        try {
+                            ret = MediaEventListenerTest.getInstance(getBaseContext()).onError();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case MediaEventListenerTest.ON_PREPARED:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onPrepared();
+                        break;
+                    case MediaEventListenerTest.ON_RATED_CHANGE:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onRateChanged();
+                        break;
+                    case MediaEventListenerTest.ON_STOPPED:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onStopped();
+                        break;
+                    default:
+                }
+                mediaEventListenerTestCaseList.get(position).setResult(ret);
+                mediaEventListenerTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mediaEventListenerTestAdapter.notifyDataSetChanged();
+                    }
+                });
+
+            }
+        });
+
+        threadMediaEventListenerTest.start();
+
     }
 
     public void testSfEventListener(final int position) {

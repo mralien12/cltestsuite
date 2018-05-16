@@ -150,18 +150,17 @@ public class ChannelPlayerTVStreamLiveTestActivity extends Activity {
         Channel playChannel = null;
         if (channels.length > 0) {
             playChannel = channels[0];
+            channelPlayer.setDataSource(playChannel.getUri());
+            try {
+                channelPlayer.start();
+                TLog.i(this, "Media Player start");
+            } catch (NoAvailableResourceException e) {
+                e.printStackTrace();
+            }
         } else {
             TLog.e(this, "Empty channel list");
             MainActivity.mediaTestCaseList.get(MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE).setFailedReason("Empty channel list");
             finish();
-        }
-
-        channelPlayer.setDataSource(playChannel.getUri());
-        try {
-            channelPlayer.start();
-            TLog.i(this, "Media Player start");
-        } catch (NoAvailableResourceException e) {
-            e.printStackTrace();
         }
 
         // 1. Instantiate an AlertDialog.Builder with its constructor

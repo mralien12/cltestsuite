@@ -50,16 +50,16 @@
         <item>1.ChannelPlayer - TV Stream (Live)</item>
         <item>2.ChannelPlayer - TV Stream (TSR)</item>
         <item>3.ChannelEventListener.onChannelEvent</item>
-        <item>4.MediaPlayer</item>
-        <item>5.MediaEventListener</item>
-        <item>6.CaptionControllerEventListener.onDetatch</item>
+        <item>4.CaptionControllerEventListener.onDetatch</item>
     </string-array>
 
     <string-array name="media_event_listener_test">
         <item>1.MediaEventListener.onBeginning</item>
-        <item>2.MediaEventListener.onBufferingUpdate</item>
-        <item>3.MediaEventListener.onCompletion</item>
-        <item>4.MediaEventListener.onError</item>
+        <item>2.MediaEventListener.onCompletion</item>
+        <item>3.MediaEventListener.onError</item>
+        <item>4.MediaEventListener.onPrepared</item>
+        <item>5.MediaEventListener.onRateChanged</item>
+        <item>6.MediaEventListener.onStopped</item>
     </string-array>
 
     <string-array name="sf_test_list">
