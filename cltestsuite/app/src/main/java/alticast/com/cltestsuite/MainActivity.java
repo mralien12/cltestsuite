@@ -11,10 +11,16 @@
 
 package alticast.com.cltestsuite;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.v4.app.ActivityCompat;
+import android.util.Xml;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -23,9 +29,19 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.channelmanager.ChannelListTest;
@@ -37,6 +53,7 @@ import alticast.com.cltestsuite.media.MediaEventListenerTest;
 import alticast.com.cltestsuite.media.MediaTest;
 import alticast.com.cltestsuite.mpeg.SectionFilterTest;
 import alticast.com.cltestsuite.utils.ShowResultActivity;
+import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
 import alticast.com.cltestsuite.utils.TestCaseAdapter;
 
@@ -65,6 +82,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            }
+        }
 
         addControl();
         addEvent();
@@ -291,6 +314,7 @@ public class MainActivity extends Activity {
         btnExportResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                exportTestResults();
             }
         });
 
@@ -1120,6 +1144,138 @@ public class MainActivity extends Activity {
             mediaTestCaseList.get(MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE).setStatus(TestCase.TEST_DONE);
             mediaTestAdapter.notifyDataSetChanged();
 
+        }
+    }
+
+    private void exportTestResults() {
+        int numOfPassTC = 0;
+        int numOfFailTC = 0;
+        File resultXmlFile = new File("/storage/emulated/0/androidtvtest.xml");
+
+        if (!resultXmlFile.exists()) {
+            try {
+                resultXmlFile.createNewFile();
+            } catch (IOException e) {
+                TLog.e(this, "Can not create " + resultXmlFile.getPath());
+                e.printStackTrace();
+            }
+        }
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(resultXmlFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        XmlSerializer xmlSerializer = Xml.newSerializer();
+
+        try {
+            xmlSerializer.setOutput(fileOutputStream, "UTF-8");
+            xmlSerializer.startDocument(null, false);
+            xmlSerializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            xmlSerializer.processingInstruction("xml-stylesheet type=\"text/xsl\" href=\"compatibility_result.xsl\"");
+            xmlSerializer.startTag(null, "Result");
+            xmlSerializer.attribute(null, "suite_name", "TCTS_VERIFIER");
+            xmlSerializer.attribute(null, "report_version", "1.0");
+
+            xmlSerializer.startTag(null, "Build");
+            xmlSerializer.attribute(null, "build_device", "hgs1000s");
+            xmlSerializer.endTag(null, "Build");
+
+            xmlSerializer.startTag(null, "Module");
+            xmlSerializer.attribute(null, "name", "TCTSVerifier");
+
+            xmlSerializer.startTag(null, "TestCase");
+
+            if (listTestedTC != null) {
+                for (int i = 0; i < listTestedTC.size(); i++) {
+                    ShowResultActivity tc = listTestedTC.get(i);
+                    if (tc.isSuccessTestCase()) {
+                        numOfPassTC++;
+                    } else {
+                        numOfFailTC++;
+                    }
+                    xmlSerializer.startTag(null, "Test");
+                    xmlSerializer.attribute(null, "result",
+                            tc.isSuccessTestCase() ? "pass" : "fail");
+                    xmlSerializer.attribute(null, "name", tc.getName());
+                    xmlSerializer.endTag(null, "Test");
+                }
+            }
+
+            xmlSerializer.endTag(null, "TestCase");
+
+            xmlSerializer.endTag(null, "Module");
+
+            xmlSerializer.startTag(null, "Summary");
+            xmlSerializer.attribute(null, "pass", String.valueOf(numOfPassTC));
+            xmlSerializer.attribute(null, "fail", String.valueOf(numOfFailTC));
+            xmlSerializer.endTag(null, "Summary");
+
+            xmlSerializer.endTag(null, "Result");
+            xmlSerializer.endDocument();
+            xmlSerializer.flush();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            TLog.e(this, e.toString());
+        }
+
+        try {
+            File result_zip_file = new File("/storage/emulated/0/test_result.zip"); //TODO Add date time in filename
+            FileOutputStream fos = new FileOutputStream(result_zip_file);
+            ZipOutputStream zos = new ZipOutputStream(fos);
+
+            /* Firstly, zip xml file */
+            InputStream fisResultXml = new FileInputStream(resultXmlFile);
+            zipFile(fisResultXml, "androidtvtest.xml", zos);
+            fisResultXml.close();
+            /* Secondly, zip logo.png */
+            @SuppressLint("ResourceType")
+            InputStream isLogoPng = getResources().openRawResource(R.drawable.logo);
+            zipFile(isLogoPng, "logo.png", zos);
+            isLogoPng.close();
+
+                /* Thirdly, zip css file */
+            InputStream isCssFile = getAssets().open("compatibility_result.css");
+            zipFile(isCssFile, "compatibility_result.css", zos);
+            isCssFile.close();
+
+                /* Fourthly, zip xsd file */
+            InputStream isXsdFile = getAssets().open("compatibility_result.xsd");
+            zipFile(isXsdFile, "compatibility_result.xsd", zos);
+            isXsdFile.close();
+
+                /* Fifthly, zip xsl file */
+            InputStream isXslFile = getAssets().open("compatibility_result.xsl");
+            zipFile(isXslFile, "compatibility_result.xsl", zos);
+            isXslFile.close();
+
+            zos.closeEntry();
+            zos.close();
+            fos.close();
+            resultXmlFile.delete();
+
+            Toast.makeText(getApplicationContext(), "Result saved in " + result_zip_file.getPath(),
+                    Toast.LENGTH_SHORT).show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void zipFile(InputStream inputStream, String file_name, ZipOutputStream zos) {
+        byte buf[] = new byte[1024];
+        int len;
+        ZipEntry ze = new ZipEntry(file_name);
+        try {
+            zos.putNextEntry(ze);
+            while ((len = inputStream.read(buf)) > 0) {
+                zos.write(buf, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
