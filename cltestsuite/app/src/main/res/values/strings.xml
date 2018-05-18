@@ -81,5 +81,6 @@
         <item>3.ConnectionLostException</item>
         <item>4.InvalidSourceException</item>
         <item>5.NoDataAvailableException</item>
+        <item>6.FilteringInterruptedException</item>
     </string-array>
 </resources>

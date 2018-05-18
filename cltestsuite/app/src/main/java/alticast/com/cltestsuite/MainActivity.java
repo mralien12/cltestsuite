@@ -133,14 +133,12 @@ public class MainActivity extends Activity {
         lvSFEventTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //testSfEventListener (position);
             }
         });
 
         lvSFExceptionTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //testSfExceptionListener (position);
             }
         });
     }
@@ -630,8 +628,128 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
+        btnAllSfTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        btnSFEventTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkSFEventResult();
+            }
+        });
+
+        btnSFExceptionTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkSFExceptionResult();
+            }
+        });
     }
 
+    private void checkSFExceptionResult() {
+        threadAllChannelTest = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int ret = TestCase.FAIL;
+                for (int testCase = 0; testCase < sfExceptionTestCaseList.size(); testCase++) {
+                    sfExceptionTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfExceptionTestAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                /* Wait few miliseconds for updating UI */
+                try {
+                    Thread.sleep(DELAY_UPDATE_UI);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                for (int testCase = 0; testCase < sfExceptionTestCaseList.size(); testCase++) {
+                    sfExceptionTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sfExceptionTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                    switch (testCase) {
+                        case SectionFilterTest.FILTER_RESOURCE_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.FILTER_RESOURCE_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.ILLEGAL_FILTER_DEFINITION_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.ILLEGAL_FILTER_DEFINITION_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.CONNECTION_LOST_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.CONNECTION_LOST_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.INVALID_SOURCE_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.INVALID_SOURCE_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.NO_DATA_AVAILABLE_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.NO_DATA_AVAILABLE_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.FILTERING_INTERRUPTED_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.FILTERING_INTERRUPTED_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        default:
+                    }
+
+                    sfExceptionTestCaseList.get(testCase).setResult(ret);
+                    sfExceptionTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sfExceptionTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+        });
+        threadAllChannelTest.start();
+    }
+
+    private void checkSFEventResult() {
+        threadAllChannelTest = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int testCase = 0; testCase < sfEventTestCaseList.size(); testCase++) {
+                    sfEventTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                }
+
+                sfEventTestCaseList.get(0).setStatus(TestCase.TEST_RUNNING);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfEventTestAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                int[] positions = SectionFilterTest.getInstance().sectionFilterEvent(sfEventTestCaseList.size());
+                for (int position = 0; position < sfEventTestCaseList.size(); position++) {
+                    sfEventTestCaseList.get(position).setResult(positions[position]);
+                    sfEventTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfEventTestAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        });
+        threadAllChannelTest.start();
+    }
 
     private void testAllFunction() {
     }
@@ -1035,103 +1153,9 @@ public class MainActivity extends Activity {
     }
 
     public void testSfEventListener(final int position) {
-        if (threadScan != null) {
-            if (threadScan.isAlive()) {
-                Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
-                return;
-            }
-        }
-
-        threadScan = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ret = TestCase.FAIL;
-                sfTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sfTestAdapter.notifyDataSetChanged();
-                    }
-                });
-                switch (position) {
-                    case SectionFilterTest.SF_EXCEPTION:
-                        break;
-                    case SectionFilterTest.SF_EVENT:
-                        ret = SectionFilterTest.getInstance().sectionFilterEvent();
-                        break;
-                    default:
-                }
-
-                sfTestCaseList.get(position).setResult(ret);
-                sfTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sfTestAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-        });
-        Toast.makeText(getApplicationContext(), "Testcase " + arrSFTest[position], Toast.LENGTH_SHORT).show();
-
-        sfTestCaseList.get(position).setStatus(TestCase.NOT_TEST);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sfTestAdapter.notifyDataSetChanged();
-            }
-        });
-        threadScan.start();
     }
 
     public void testSfExceptionListener(final int position) {
-        if (threadScan != null) {
-            if (threadScan.isAlive()) {
-                Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
-                return;
-            }
-        }
-
-        threadScan = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ret = TestCase.FAIL;
-                sfTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sfTestAdapter.notifyDataSetChanged();
-                    }
-                });
-                switch (position) {
-                    case SectionFilterTest.SF_EXCEPTION:
-                        break;
-                    case SectionFilterTest.SF_EVENT:
-                        ret = SectionFilterTest.getInstance().sectionFilterEvent();
-                        break;
-                    default:
-                }
-
-                sfTestCaseList.get(position).setResult(ret);
-                sfTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sfTestAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-        });
-        Toast.makeText(getApplicationContext(), "Testcase " + arrSFTest[position], Toast.LENGTH_SHORT).show();
-
-        sfTestCaseList.get(position).setStatus(TestCase.NOT_TEST);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sfTestAdapter.notifyDataSetChanged();
-            }
-        });
-        threadScan.start();
     }
 
     @Override
