@@ -50,7 +50,7 @@
         <item>1.ChannelPlayer - TV Stream (Live)</item>
         <item>2.ChannelPlayer - TV Stream (TSR)</item>
         <item>3.ChannelEventListener.onChannelEvent</item>
-        <item>4.CaptionControllerEventListener.onDetatch</item>
+        <item>4.CaptionControllerEventListener.onDetach</item>
     </string-array>
 
     <string-array name="media_event_listener_test">

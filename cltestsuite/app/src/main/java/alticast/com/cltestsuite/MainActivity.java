@@ -1051,42 +1051,48 @@ public class MainActivity extends Activity {
                 intent = new Intent(getBaseContext(), ChannelPlayerTVStreamTSRTestActivity.class);
                 startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE);
                 break;
-            case MediaTest.CHANNEL_EVENT_LISTENER:
-                if (threadMediaTest != null) {
-                    if (threadMediaTest.isAlive()) {
-                        Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                }
-
-                threadMediaTest = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int ret = TestCase.FAIL;
-
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_RUNNING);
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaTestAdapter.notifyDataSetChanged();
-                            }
-                        });
-                        ret = ChannelEventListenerTest.getInstance(getBaseContext()).onChannelEvent();
-
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setResult(ret);
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_DONE);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaTestAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
-                threadMediaTest.start();
-                break;
             default:
+        }
+
+        if (position == MediaTest.CHANNEL_EVENT_LISTENER  || position == MediaTest.CAPTION_CONTROLLER_EVENT_LISTENER_ON_DETACH) {
+            if (threadMediaTest != null) {
+                if (threadMediaTest.isAlive()) {
+                    Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
+            threadMediaTest = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int ret = TestCase.FAIL;
+
+                    mediaTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mediaTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+                    if (position == MediaTest.CHANNEL_EVENT_LISTENER) {
+                        ret = ChannelEventListenerTest.getInstance(getBaseContext()).onChannelEvent();
+                    } else if (position == MediaTest.CAPTION_CONTROLLER_EVENT_LISTENER_ON_DETACH) {
+                        ret = MediaTest.getInstance().captionControllerEventListenerOnDetach();
+                    }
+
+
+                    mediaTestCaseList.get(position).setResult(ret);
+                    mediaTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mediaTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            });
+            threadMediaTest.start();
         }
     }
 
