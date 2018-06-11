@@ -48,7 +48,6 @@ import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
 import alticast.com.cltestsuite.media.ChannelEventListenerTest;
 import alticast.com.cltestsuite.media.ChannelPlayerTVStreamLiveTestActivity;
-import alticast.com.cltestsuite.media.ChannelPlayerTVStreamTSRTestActivity;
 import alticast.com.cltestsuite.media.MediaEventListenerTest;
 import alticast.com.cltestsuite.media.MediaTest;
 import alticast.com.cltestsuite.mpeg.SectionFilterTest;
@@ -1048,8 +1047,8 @@ public class MainActivity extends Activity {
                 startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE_REQUEST_CODE);
                 break;
             case MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR:
-                intent = new Intent(getBaseContext(), ChannelPlayerTVStreamTSRTestActivity.class);
-                startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE);
+//                intent = new Intent(getBaseContext(), ChannelPlayerTVStreamTSRTestActivity.class);
+//                startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE);
                 break;
             default:
         }
