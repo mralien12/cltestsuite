@@ -93,7 +93,7 @@ public class DVRTest {
         devices = null;
 
         //add device rootpath
-        List<String> list = new ArrayList<String>();
+//        List<String> list = new ArrayList<String>();
         BufferedReader buf_reader = null;
         try {
             buf_reader = new BufferedReader(new FileReader("/proc/mounts"));
@@ -135,7 +135,7 @@ public class DVRTest {
             }
         }
 
-        /* Delay few miliseconds for save result*/
+        /* Delay few milliseconds for save result*/
         try {
             TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
@@ -150,7 +150,7 @@ public class DVRTest {
     public int stateListenerOnStopped() {
         recordingManager.getInstance().stop();
 
-        /* Delay few miliseconds for save result*/
+        /* Delay few milliseconds for save result*/
         try {
             TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {

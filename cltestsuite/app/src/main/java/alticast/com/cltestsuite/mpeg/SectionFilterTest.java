@@ -11,10 +11,7 @@
 
 package alticast.com.cltestsuite.mpeg;
 
-import android.util.Log;
-
 import java.util.concurrent.TimeUnit;
-
 import af.channel.Channel;
 import af.channel.ChannelManager;
 import af.media.Tuner;
@@ -22,12 +19,9 @@ import af.media.TunerFactory;
 import af.mpeg.section.ConnectionLostException;
 import af.mpeg.section.EndOfFilteringEvent;
 import af.mpeg.section.FilterResourceException;
-import af.mpeg.section.FilteringInterruptedException;
 import af.mpeg.section.IllegalFilterDefinitionException;
 import af.mpeg.section.IncompleteFilteringEvent;
-import af.mpeg.section.Section;
 import af.mpeg.section.SectionAvailableEvent;
-import af.mpeg.section.SectionFilter;
 import af.mpeg.section.SectionFilterEvent;
 import af.mpeg.section.SectionFilterGroup;
 import af.mpeg.section.SectionFilterListener;
