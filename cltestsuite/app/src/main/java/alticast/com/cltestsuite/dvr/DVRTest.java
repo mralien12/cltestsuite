@@ -15,8 +15,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import af.channel.Channel;
@@ -167,7 +165,7 @@ public class DVRTest {
         isRecordingStarted = false;
         isRightTime = false;
 
-        ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+        ScanTest.getInstance().SCA_NotifyScanSaveResultFinished();
         stateListenerOnStated();
 
         RecordingManager.getInstance().start(devices + "/");

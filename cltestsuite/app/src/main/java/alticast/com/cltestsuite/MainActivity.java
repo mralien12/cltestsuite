@@ -55,6 +55,7 @@ import alticast.com.cltestsuite.utils.ShowResultActivity;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
 import alticast.com.cltestsuite.utils.TestCaseAdapter;
+import alticast.com.cltestsuite.utils.Util;
 
 public class MainActivity extends Activity {
     private static final int DELAY_UPDATE_UI = 500;   /* miliseconds */
@@ -91,6 +92,8 @@ public class MainActivity extends Activity {
         addControl();
         addEvent();
         addListener();
+
+        Util.setProjectName("kbro");
     }
 
     private void addListener() {
@@ -358,11 +361,11 @@ public class MainActivity extends Activity {
                                 });
 
                                 switch (testCase) {
-                                    case ScanTest.NOTTITY:
+                                    case ScanTest.NOTIFY:
                                         ret = ScanTest.getInstance().SCA_Notify();
                                         break;
                                     case ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH:
-                                        ret = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                                        ret = ScanTest.getInstance().SCA_NotifyScanSaveResultFinished();
                                         break;
                                     case ScanTest.SELECT_CONFLICT_CHANNEL_REGION:
                                         ret = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
@@ -900,11 +903,11 @@ public class MainActivity extends Activity {
                     }
                 });
                 switch (position) {
-                    case ScanTest.NOTTITY:
+                    case ScanTest.NOTIFY:
                         ret = ScanTest.getInstance().SCA_Notify();
                         break;
                     case ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH:
-                        ret = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                        ret = ScanTest.getInstance().SCA_NotifyScanSaveResultFinished();
                         break;
                     case ScanTest.SELECT_CONFLICT_CHANNEL_REGION:
                         ret = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
