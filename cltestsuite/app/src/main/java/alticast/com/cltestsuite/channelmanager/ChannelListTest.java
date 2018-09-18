@@ -22,6 +22,7 @@ import af.resource.ResourceClient;
 import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
+import alticast.com.cltestsuite.utils.Util;
 
 public class ChannelListTest {
     public static final int CHANNEL_LIST_UPDATED = 0;
@@ -50,7 +51,8 @@ public class ChannelListTest {
                     setFailedReason("Channel list is empty");
             return TestCase.FAIL;
         }
-        Channel firstChannel = channels[0];
+
+        Channel testChannel = channels[Util.getTestChannelNumber()];
         firstTuner = TunerFactory.getInstance().createTuner(new ResourceClient() {
             @Override
             public String getName() {
@@ -72,7 +74,7 @@ public class ChannelListTest {
         });
 
         try {
-            if (!firstTuner.tune(firstChannel.getUri())) {
+            if (!firstTuner.tune(testChannel.getUri())) {
                 TLog.e(this, "CHL_OnChannelListUpdated: Failed to tune");
                 MainActivity.channelTestCaseList.get(ChannelListTest.CHANNEL_LIST_UPDATED).
                         setFailedReason("Failed to tune first channel");

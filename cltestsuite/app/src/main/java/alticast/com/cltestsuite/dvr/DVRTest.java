@@ -30,6 +30,8 @@ import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
+import alticast.com.cltestsuite.utils.Util;
+
 import com.alticast.af.dvr.RRecordingSessionCallback;
 
 public class DVRTest {
@@ -175,7 +177,7 @@ public class DVRTest {
         }
 
         if (channels.length > 0) {
-            currentChannel = channels[0];
+            currentChannel = channels[Util.getTestChannelNumber()];
             if (RecordingManager.getInstance().getStoragePath() != null) {
                 RecordingManager.getInstance().start("");
 

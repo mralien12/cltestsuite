@@ -34,6 +34,7 @@ import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.R;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
+import alticast.com.cltestsuite.utils.Util;
 
 public class ChannelPlayerTVStreamLiveTestActivity extends Activity {
     Intent intent;
@@ -149,7 +150,7 @@ public class ChannelPlayerTVStreamLiveTestActivity extends Activity {
         Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         Channel playChannel = null;
         if (channels.length > 0) {
-            playChannel = channels[0];
+            playChannel = channels[Util.getTestChannelNumber()];
             channelPlayer.setDataSource(playChannel.getUri());
             try {
                 channelPlayer.start();

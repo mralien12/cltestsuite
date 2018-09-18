@@ -21,6 +21,7 @@ import java.util.StringTokenizer;
 
 public class Util {
     private static String projectName = "";
+    private static int testChannelNumber;
     public static String getExternalStorage() {
         String pathOfStorage = null;
         List<String> listOfStorage = new ArrayList<String>();
@@ -63,5 +64,13 @@ public class Util {
 
     public static void setProjectName(String projectNameInput) {
         projectName = projectNameInput;
+    }
+
+    public static int getTestChannelNumber() {
+        return testChannelNumber;
+    }
+
+    public static void setTestChannelNumber(int testChannelNumber) {
+        Util.testChannelNumber = testChannelNumber;
     }
 }
