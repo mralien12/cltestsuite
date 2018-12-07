@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
 
         // Set up test environment for kbro
         Util.setProjectName("kbro");
-        Util.setTestChannelNumber(47);
+        Util.setTestChannelNumber(0);
 
         // Set up test environment for hgs1000s
 //        Util.setProjectName("hgs1000s");
