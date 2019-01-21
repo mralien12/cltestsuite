@@ -26,18 +26,18 @@ import alticast.com.cltestsuite.utils.TestCase;
  *  with Alticast.
  */
 
-public class ChannelEventListener {
-    private static ChannelEventListener instance;
+public class ChannelEventListenerTest {
+    private static ChannelEventListenerTest instance;
     private Context context;
     private int ret;
 
-    private ChannelEventListener(Context context) {
+    private ChannelEventListenerTest(Context context) {
         this.context  = context;
     }
 
-    public static synchronized ChannelEventListener getInstance(Context context) {
+    public static synchronized ChannelEventListenerTest getInstance(Context context) {
         if (instance == null) {
-            instance = new ChannelEventListener(context);
+            instance = new ChannelEventListenerTest(context);
         }
 
         return instance;
@@ -159,7 +159,6 @@ public class ChannelEventListener {
                     case CA_REFUSAL:
                         break;
                     default:
-
                 }
             }
         });

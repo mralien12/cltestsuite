@@ -12,7 +12,6 @@
 package alticast.com.cltestsuite.mpeg;
 
 import java.util.concurrent.TimeUnit;
-
 import af.channel.Channel;
 import af.channel.ChannelManager;
 import af.media.Tuner;
@@ -20,17 +19,15 @@ import af.media.TunerFactory;
 import af.mpeg.section.ConnectionLostException;
 import af.mpeg.section.EndOfFilteringEvent;
 import af.mpeg.section.FilterResourceException;
-import af.mpeg.section.FilteringInterruptedException;
 import af.mpeg.section.IllegalFilterDefinitionException;
 import af.mpeg.section.IncompleteFilteringEvent;
-import af.mpeg.section.Section;
 import af.mpeg.section.SectionAvailableEvent;
-import af.mpeg.section.SectionFilter;
 import af.mpeg.section.SectionFilterEvent;
 import af.mpeg.section.SectionFilterGroup;
 import af.mpeg.section.SectionFilterListener;
 import af.mpeg.section.TableSectionFilter;
 import af.mpeg.section.TimeOutEvent;
+import af.mpeg.section.VersionChangeDetectedEvent;
 import af.resource.NoAvailableResourceException;
 import af.resource.ResourceClient;
 import alticast.com.cltestsuite.MainActivity;
@@ -39,10 +36,23 @@ import alticast.com.cltestsuite.utils.TestCase;
 
 public class SectionFilterTest {
 
-    public static final int SF_EXCEPTION = 0;
-    public static final int SF_EVENT = 1;
-    private static int ret;
+    public static final int TIME_OUT_EVENT = 0;
+    public static final int INCOMPLETE_FILTERING_EVENT = 1;
+    public static final int VERSION_CHANGE_DETECTED_EVENT = 2;
+    public static final int SECTION_AVAILABLE_EVENT = 3;
+    public static final int END_OF__FILTERING_EVENT = 4;
 
+    public static final int FILTER_RESOURCE_EXCEPTION = 0;
+    public static final int ILLEGAL_FILTER_DEFINITION_EXCEPTION = 1;
+    public static final int CONNECTION_LOST_EXCEPTION = 2;
+    public static final int INVALID_SOURCE_EXCEPTION = 3;
+    public static final int NO_DATA_AVAILABLE_EXCEPTION = 4;
+    public static final int FILTERING_INTERRUPTED_EXCEPTION = 5;
+
+    public static final int TIMEOUT = 20000;
+    private static int ret[];
+
+    private static SectionFilterListener sectionFilterListener;
     private static SectionFilterTest instance = null;
     private final static int NUMBER_OF_SECTION_FILTER = 1;
     private static SectionFilterGroup sectionFilterGroup;
@@ -58,9 +68,11 @@ public class SectionFilterTest {
     public SectionFilterTest() {
     }
 
-    public static synchronized SectionFilterTest getInstance () {
+    public static synchronized SectionFilterTest getInstance() {
+
+        errorLog = null;
+
         if (instance == null) {
-            errorLog = null;
             instance = new SectionFilterTest();
 
             sectionFilterGroup = new SectionFilterGroup(NUMBER_OF_SECTION_FILTER);
@@ -69,11 +81,9 @@ public class SectionFilterTest {
                 channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
             }
 
-            if (channels.length <= 0)
-            {
+            if (channels.length <= 0) {
                 errorLog = "Empty channel list";
-            }else
-            {
+            } else {
                 currentChannel = channels[0];
             }
 
@@ -92,7 +102,7 @@ public class SectionFilterTest {
             singleTuner.setTuneEventListener(new Tuner.TunerEventListener() {
                 @Override
                 public void onTuningEvent(int i, String s) {
-                    TLog.i(this, "singleTest: onTuningEvent [ " + i + "] [" + s +"]" );
+                    TLog.i(this, "singleTest: onTuningEvent [ " + i + "] [" + s + "]");
                     if (i == 1) {
                         sourceId = singleTuner.getSourceId();
                     }
@@ -115,76 +125,58 @@ public class SectionFilterTest {
             }
         }
 
+        sectionFilterListener = new SectionFilterListener() {
+            @Override
+            public void onSectionFilterEvent(SectionFilterEvent sectionFilterEvent) {
+
+                TLog.i(this, "onSectionFilterEvent() [" + sectionFilterEvent + "]");
+
+                if (sectionFilterEvent instanceof TimeOutEvent) {
+                    TLog.i(this, "Section filter operations time out");
+                    ret[TIME_OUT_EVENT] = TestCase.SUCCESS;
+                } else if (sectionFilterEvent instanceof IncompleteFilteringEvent) {
+                    TLog.i(this, "Filter parameters is incorrect");
+                    ret[INCOMPLETE_FILTERING_EVENT] = TestCase.SUCCESS;
+                } else if (sectionFilterEvent instanceof VersionChangeDetectedEvent) {
+                    TLog.i(this, "Section filter operations is different from earlier sections!!");
+                    ret[VERSION_CHANGE_DETECTED_EVENT] = TestCase.SUCCESS;
+                } else if (sectionFilterEvent instanceof SectionAvailableEvent) {
+                    TLog.i(this, "Section filter operations is successful!!");
+                    ret[SECTION_AVAILABLE_EVENT] = TestCase.SUCCESS;
+                } else if (sectionFilterEvent instanceof EndOfFilteringEvent) {
+                    TLog.i(this, "Section filter operations is EndOfFilteringEvent");
+                    ret[END_OF__FILTERING_EVENT] = TestCase.SUCCESS;
+                    errorLog = "Section filter operations is EndOfFilteringEvent";
+                    MainActivity.sfEventTestCaseList.get(END_OF__FILTERING_EVENT).setFailedReason(errorLog);
+                }
+            }
+        };
+
         return instance;
     }
 
-    public int sectionFitlerEvent (){
-        ret = TestCase.FAIL;
+    public int sectionFilterException(int position, int size) {
+        ret = new int[size];
+        for (int i = 0; i < size; i++)
+            ret[i] = TestCase.FAIL;
+
+        return ret[0];
+    }
+
+    public int[] sectionFilterEvent(int size) {
+        ret = new int[size];
+        for (int i = 0; i < size; i++)
+            ret[i] = TestCase.FAIL;
 
         if (errorLog == null) {
             TableSectionFilter tableSectionFilter = sectionFilterGroup.newTableSectionFilter();
-            /* Set timeout for section filter to 20s */
-            tableSectionFilter.setTimeOut(20000);
 
-            SectionFilterListener sectionFilterListener = new SectionFilterListener() {
-                @Override
-                public void onSectionFilterEvent(SectionFilterEvent sectionFilterEvent) {
-
-                    TLog.i(this, "onSectionFilterEvent() [" + sectionFilterEvent + "]");
-
-                    if (sectionFilterEvent instanceof TimeOutEvent) {
-                        TLog.i(this, "Section filter operations time out");
-                        errorLog = "Section filter operations time out";
-                    } else if(sectionFilterEvent instanceof IncompleteFilteringEvent) {
-                        TLog.i(this, "Filter parameters is incorrect");
-                        errorLog = "Filter parameters is incorrect";
-                    } else if (sectionFilterEvent instanceof SectionAvailableEvent) {
-                        TLog.i(this, "Section filter operations is successful. do nothing!!");
-                        errorLog = "Section filter operations is successful. do nothing!!";
-                    } else if (sectionFilterEvent instanceof EndOfFilteringEvent) {
-                        TLog.i(this, "Section filter operations is EndOfFilteringEvent");
-                        errorLog = "Section filter operations is EndOfFilteringEvent";
-
-                        TableSectionFilter recievesf = (TableSectionFilter) sectionFilterEvent.getSource();
-
-                        try {
-                            Section currentsection[] = recievesf.getSections();
-
-                            int seclen = currentsection.length;
-                            try {
-                                for(int j = 0 ; j < seclen ; j ++) {
-                                    byte[] sectiondata = currentsection[j].getData();
-                                    int dataLen = sectiondata.length;
-                                    TLog.i(this, "section data [" + dataLen + "]");
-                                    if (dataLen >= 20) {
-                                        dataLen = 20;
-                                        TLog.i(this, "section data [" + dataLen + "]. just print out 20 bytes.");
-                                    }
-                                    StringBuffer result = new StringBuffer();
-                                    result.append("Section Data [" + j + "]");
-                                    for (int i = 0; i < dataLen; i++) {
-                                        result.append(" [" + String.format("%02x", sectiondata[i]) + "]");
-                                    }
-                                    TLog.i(this, result.toString());
-                                    currentsection[j].setEmpty();
-                                }
-                            } catch (Exception e1) {
-                                TLog.i(this, "Exception");
-                                e1.printStackTrace();
-                            }
-                            //don't stop any sectionfilter.
-
-                        } catch (FilteringInterruptedException e) {
-                            TLog.i(this, "FilteringInterruptedException");
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            };
+            /* Set timeout for section filter*/
+            tableSectionFilter.setTimeOut(TIMEOUT);
 
             tableSectionFilter.setSectionFilterListener(sectionFilterListener);
 
-            TLog.i(this, "setSourceId [" +sourceId +"]" );
+            TLog.i(this, "setSourceId [" + sourceId + "]");
             sectionFilterGroup.setSourceId(sourceId);
 
             try {
@@ -226,9 +218,41 @@ public class SectionFilterTest {
                 e.printStackTrace();
             }
 
-            MainActivity.sfTestCaseList.get(SF_EVENT).setFailedReason(errorLog);
+            sectionFilterGroup.detach();
+            //MainActivity.sfTestCaseList.get(SF_EVENT).setFailedReason(errorLog);
         } else {
-            MainActivity.sfTestCaseList.get(SF_EVENT).setFailedReason(errorLog);
+            for (int position = 0; position < size; position++)
+                MainActivity.sfTestCaseList.get(position).setFailedReason(errorLog);
+        }
+
+        for (int position = 0; position < size; position++) {
+            if (ret[position] != TestCase.SUCCESS) {
+                ret[position] = TestCase.FAIL;
+                switch (position) {
+                    case TIME_OUT_EVENT:
+                        errorLog = "Section filter operations not time out";
+                        MainActivity.sfEventTestCaseList.get(TIME_OUT_EVENT).setFailedReason(errorLog);
+                        break;
+                    case INCOMPLETE_FILTERING_EVENT:
+                        errorLog = "Section filter started by TableSectionFilter completely defined";
+                        MainActivity.sfEventTestCaseList.get(INCOMPLETE_FILTERING_EVENT).setFailedReason(errorLog);
+                        break;
+                    case VERSION_CHANGE_DETECTED_EVENT:
+                        errorLog = "Section filter has a same version_number from earlier sections";
+                        MainActivity.sfEventTestCaseList.get(VERSION_CHANGE_DETECTED_EVENT).setFailedReason(errorLog);
+                        break;
+                    case SECTION_AVAILABLE_EVENT:
+                        errorLog = "Section filter not matching the filtering pattern";
+                        MainActivity.sfEventTestCaseList.get(SECTION_AVAILABLE_EVENT).setFailedReason(errorLog);
+                        break;
+                    case END_OF__FILTERING_EVENT:
+                        errorLog = "Section filter not ending of a filtering operation started by RingSectionFilter or TableSectionFilter";
+                        MainActivity.sfEventTestCaseList.get(END_OF__FILTERING_EVENT).setFailedReason(errorLog);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
         return ret;
     }

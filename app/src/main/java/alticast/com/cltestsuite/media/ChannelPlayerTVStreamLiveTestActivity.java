@@ -34,6 +34,7 @@ import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.R;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
+import alticast.com.cltestsuite.utils.Util;
 
 public class ChannelPlayerTVStreamLiveTestActivity extends Activity {
     Intent intent;
@@ -149,19 +150,18 @@ public class ChannelPlayerTVStreamLiveTestActivity extends Activity {
         Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         Channel playChannel = null;
         if (channels.length > 0) {
-            playChannel = channels[0];
+            playChannel = channels[Util.getTestChannelNumber()];
+            channelPlayer.setDataSource(playChannel.getUri());
+            try {
+                channelPlayer.start();
+                TLog.i(this, "Media Player start");
+            } catch (NoAvailableResourceException e) {
+                e.printStackTrace();
+            }
         } else {
             TLog.e(this, "Empty channel list");
             MainActivity.mediaTestCaseList.get(MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE).setFailedReason("Empty channel list");
             finish();
-        }
-
-        channelPlayer.setDataSource(playChannel.getUri());
-        try {
-            channelPlayer.start();
-            TLog.i(this, "Media Player start");
-        } catch (NoAvailableResourceException e) {
-            e.printStackTrace();
         }
 
         // 1. Instantiate an AlertDialog.Builder with its constructor

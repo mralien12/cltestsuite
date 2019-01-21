@@ -11,9 +11,16 @@
 
 package alticast.com.cltestsuite;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.support.v4.app.ActivityCompat;
+import android.util.Xml;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,38 +29,52 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.channelmanager.ChannelListTest;
 import alticast.com.cltestsuite.dvr.DVRTest;
-import alticast.com.cltestsuite.media.ChannelEventListener;
+import alticast.com.cltestsuite.media.ChannelEventListenerTest;
 import alticast.com.cltestsuite.media.ChannelPlayerTVStreamLiveTestActivity;
-import alticast.com.cltestsuite.media.ChannelPlayerTVStreamTSRTestActivity;
+import alticast.com.cltestsuite.media.MediaEventListenerTest;
 import alticast.com.cltestsuite.media.MediaTest;
 import alticast.com.cltestsuite.mpeg.SectionFilterTest;
 import alticast.com.cltestsuite.utils.ShowResultActivity;
+import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
 import alticast.com.cltestsuite.utils.TestCaseAdapter;
+import alticast.com.cltestsuite.utils.Util;
 
 public class MainActivity extends Activity {
     private static final int DELAY_UPDATE_UI = 500;   /* miliseconds */
 
-    private ListView lvScanTest, lvChannelTest, lvDVRTest, lvEpgTest, lvMediaTest, lvMediaEventListenerTest, lvSFTest;
+    private ListView lvScanTest, lvChannelTest, lvDVRTest, lvEpgTest, lvMediaTest, lvMediaEventListenerTest, lvSFTest, lvSFEventTest, lvSFExceptionTest;
     private Button btnTestAll, btnShowResult, btnExportResult;
     private Button btnAllScanTest, btnAllChannelTest, btnAllDvrTest, btnAllEpgTest, btnAllMediaTest, btnAllSfTest;
+    private Button btnSFEventTest, btnSFExceptionTest;
+    private Button btnAllMediaEventListenerTest;
 
-    private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrMediaEventListenerTest, arrSFTest;
+    private String[] arrScanTest, arrChannelTest, arrDVRTest, arrEPGTest, arrMediaTest, arrMediaEventListenerTest, arrSFTest, arrSFEventTest, arrSFExceptionTest;
     private int ret;
 
     private Thread threadScan, threadAllScanTest, threadAllChannelTest, threadAllDvrTest;
-    private Thread threadChannelList, threadMediaTest;
+    private Thread threadChannelList, threadMediaTest, threadMediaEventListenerTest, threadAllMediaEventListenerTest;
     public static List<TestCase> scanTestCaseList, channelTestCaseList, dvrTestCaseList;
-    public static List<TestCase> epgTestCaseList, mediaTestCaseList, mediaEventListenerTestCaseList, sfTestCaseList;
+    public static List<TestCase> epgTestCaseList, mediaTestCaseList, mediaEventListenerTestCaseList, sfTestCaseList, sfEventTestCaseList, sfExceptionTestCaseList;
     private TestCaseAdapter scanTestAdapter, channelTestAdapter, dvrTestAdapter;
-    private TestCaseAdapter epgTestAdapter, mediaTestAdaper, mediaEventListenerTestAdapter, sfTestAdapter;
+    private TestCaseAdapter epgTestAdapter, mediaTestAdapter, mediaEventListenerTestAdapter, sfTestAdapter, sfEventTestAdapter, sfExceptionTestAdapter;
     private List<ShowResultActivity> listTestedTC;
     private ShowResultActivity showResultActivity;
 
@@ -62,9 +83,23 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            }
+        }
+
         addControl();
         addEvent();
         addListener();
+
+        // Set up test environment for kbro
+        Util.setProjectName("hgs1000so");
+        Util.setTestChannelNumber(0);
+
+        // Set up test environment for hgs1000s
+//        Util.setProjectName("hgs1000s");
+//        Util.setTestChannelNumber(0);
     }
 
     private void addListener() {
@@ -92,20 +127,26 @@ public class MainActivity extends Activity {
         lvMediaTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                testMediaListener(position);
+                testMedia(position);
             }
         });
 
         lvMediaEventListenerTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                testMediaEventListener(position);
             }
         });
 
-        lvSFTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        lvSFEventTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                testSfEventListener (position);
+            }
+        });
+
+        lvSFExceptionTest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             }
         });
     }
@@ -118,7 +159,8 @@ public class MainActivity extends Activity {
         ListUtils.setDynamicHeight(lvEpgTest);
         ListUtils.setDynamicHeight(lvMediaTest);
         ListUtils.setDynamicHeight(lvMediaEventListenerTest);
-        ListUtils.setDynamicHeight(lvSFTest);
+        ListUtils.setDynamicHeight(lvSFEventTest);
+        ListUtils.setDynamicHeight(lvSFExceptionTest);
 
         // Top Button Event
         btnTestAll.setOnClickListener(new View.OnClickListener() {
@@ -201,7 +243,7 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                // 5. Media Test
+                // 5.1 Media Test
                 for (TestCase testCase : mediaTestCaseList) {
                     if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
@@ -218,8 +260,42 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                // 6. Section Filter Test
-                for (TestCase testCase : sfTestCaseList) {
+                // 5.2 Media Event Listener Test
+                for (TestCase testCase : mediaEventListenerTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
+                // 6.A Section Filter Event Test
+                for (TestCase testCase : sfEventTestCaseList) {
+                    if (testCase.getResult() == TestCase.FAIL) {
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
+                        showResultActivity.setSuccessTestCase(false);
+                        listTestedTC.add(showResultActivity);
+                    } else if (testCase.getResult() == TestCase.SUCCESS) {
+                        showResultActivity = new ShowResultActivity();
+                        showResultActivity.setName(testCase.getName());
+                        showResultActivity.setResultDetail(testCase.getFailedReason());
+                        showResultActivity.setSuccessTestCase(true);
+                        listTestedTC.add(showResultActivity);
+                    }
+                }
+
+                // 6.B Section Filter Exception Test
+                for (TestCase testCase : sfExceptionTestCaseList) {
                     if (testCase.getResult() == TestCase.FAIL) {
                         showResultActivity = new ShowResultActivity();
                         showResultActivity.setName(testCase.getName());
@@ -244,7 +320,7 @@ public class MainActivity extends Activity {
         btnExportResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                exportTestResults();
             }
         });
 
@@ -291,11 +367,11 @@ public class MainActivity extends Activity {
                                 });
 
                                 switch (testCase) {
-                                    case ScanTest.NOTTITY:
+                                    case ScanTest.NOTIFY:
                                         ret = ScanTest.getInstance().SCA_Notify();
                                         break;
                                     case ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH:
-                                        ret = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                                        ret = ScanTest.getInstance().SCA_NotifyScanSaveResultFinished();
                                         break;
                                     case ScanTest.SELECT_CONFLICT_CHANNEL_REGION:
                                         ret = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
@@ -478,14 +554,209 @@ public class MainActivity extends Activity {
             }
         });
 
-        btnAllSfTest.setOnClickListener(new View.OnClickListener()
+        btnAllMediaEventListenerTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (threadAllMediaEventListenerTest != null) {
+                    if (threadAllMediaEventListenerTest.isAlive()) {
+                        Toast.makeText(MainActivity.this, "Media Event Listener Test is running...", Toast.LENGTH_LONG).show();
+                        return;
+                    } else {
+                        threadAllMediaEventListenerTest.start();
+                    }
+                } else {
+                    threadAllMediaEventListenerTest = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int ret = TestCase.FAIL;
+                            for (int testCase = 0; testCase < mediaEventListenerTestCaseList.size(); testCase++) {
+                                mediaEventListenerTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mediaEventListenerTestAdapter.notifyDataSetChanged();
+                                }
+                            });
 
-        {
+                            /* Wait few miliseconds for updating UI */
+                            try {
+                                Thread.sleep(DELAY_UPDATE_UI);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            for (int testCase = 0; testCase < mediaEventListenerTestCaseList.size(); testCase++) {
+                                mediaEventListenerTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mediaEventListenerTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
+                                switch (testCase) {
+                                    case MediaEventListenerTest.ON_BEGINNING:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onBeginingTest();
+                                        break;
+                                    case MediaEventListenerTest.ON_COMPLETION:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onCompletion();
+                                        break;
+                                    case MediaEventListenerTest.ON_ERROR:
+                                        try {
+                                            ret = MediaEventListenerTest.getInstance(getBaseContext()).onError();
+                                        } catch (RemoteException e) {
+                                            e.printStackTrace();
+                                        }
+                                        break;
+                                    case MediaEventListenerTest.ON_PREPARED:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onPrepared();
+                                        break;
+                                    case MediaEventListenerTest.ON_RATED_CHANGE:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onRateChanged();
+                                        break;
+                                    case MediaEventListenerTest.ON_STOPPED:
+                                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onStopped();
+                                        break;
+                                    default:
+                                }
+                                mediaEventListenerTestCaseList.get(testCase).setResult(ret);
+                                mediaEventListenerTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mediaEventListenerTestAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
+
+                        }
+                    });
+                    threadAllMediaEventListenerTest.start();
+                }
+            }
+        });
+
+        btnAllSfTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
+
+        btnSFEventTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkSFEventResult();
+            }
+        });
+
+        btnSFExceptionTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkSFExceptionResult();
+            }
+        });
+    }
+
+    private void checkSFExceptionResult() {
+        threadAllChannelTest = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int ret = TestCase.FAIL;
+                for (int testCase = 0; testCase < sfExceptionTestCaseList.size(); testCase++) {
+                    sfExceptionTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfExceptionTestAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                /* Wait few miliseconds for updating UI */
+                try {
+                    Thread.sleep(DELAY_UPDATE_UI);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                for (int testCase = 0; testCase < sfExceptionTestCaseList.size(); testCase++) {
+                    sfExceptionTestCaseList.get(testCase).setStatus(TestCase.TEST_RUNNING);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sfExceptionTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                    switch (testCase) {
+                        case SectionFilterTest.FILTER_RESOURCE_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.FILTER_RESOURCE_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.ILLEGAL_FILTER_DEFINITION_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.ILLEGAL_FILTER_DEFINITION_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.CONNECTION_LOST_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.CONNECTION_LOST_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.INVALID_SOURCE_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.INVALID_SOURCE_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.NO_DATA_AVAILABLE_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.NO_DATA_AVAILABLE_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        case SectionFilterTest.FILTERING_INTERRUPTED_EXCEPTION:
+                            ret = SectionFilterTest.getInstance().sectionFilterException(SectionFilterTest.FILTERING_INTERRUPTED_EXCEPTION, sfExceptionTestCaseList.size());
+                            break;
+                        default:
+                    }
+
+                    sfExceptionTestCaseList.get(testCase).setResult(ret);
+                    sfExceptionTestCaseList.get(testCase).setStatus(TestCase.TEST_DONE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sfExceptionTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+        });
+        threadAllChannelTest.start();
+    }
+
+    private void checkSFEventResult() {
+        threadAllChannelTest = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int testCase = 0; testCase < sfEventTestCaseList.size(); testCase++) {
+                    sfEventTestCaseList.get(testCase).setResult(TestCase.NOT_TEST);
+                }
+
+                sfEventTestCaseList.get(0).setStatus(TestCase.TEST_RUNNING);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfEventTestAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                int[] positions = SectionFilterTest.getInstance().sectionFilterEvent(sfEventTestCaseList.size());
+                for (int position = 0; position < sfEventTestCaseList.size(); position++) {
+                    sfEventTestCaseList.get(position).setResult(positions[position]);
+                    sfEventTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sfEventTestAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        });
+        threadAllChannelTest.start();
     }
 
     private void testAllFunction() {
@@ -499,7 +770,9 @@ public class MainActivity extends Activity {
         arrEPGTest = getResources().getStringArray(R.array.epg_test_list);
         arrMediaTest = getResources().getStringArray(R.array.media_test_list);
         arrMediaEventListenerTest = getResources().getStringArray(R.array.media_event_listener_test);
-        arrSFTest = getResources().getStringArray(R.array.sf_test_list);
+        arrSFEventTest = getResources().getStringArray(R.array.sf_event_list);
+        arrSFExceptionTest = getResources().getStringArray(R.array.sf_exception_list);
+        //arrSFTest = getResources().getStringArray(R.array.sf_test_list);
 
         lvScanTest = findViewById(R.id.scan_test_list_view);
         lvChannelTest = findViewById(R.id.channel_test_list_view);
@@ -507,7 +780,10 @@ public class MainActivity extends Activity {
         lvEpgTest = findViewById(R.id.epg_test_list_view);
         lvMediaTest = findViewById(R.id.media_test_list_view);
         lvMediaEventListenerTest = findViewById(R.id.media_event_listener_test_list_view);
-        lvSFTest = findViewById(R.id.sf_test_list_view);
+        lvSFEventTest = findViewById(R.id.sf_event_list_view);
+        lvSFExceptionTest = findViewById(R.id.sf_exception_list_view);
+        //lvSFTest = findViewById(R.id.sf_test_list_view);
+
 
         /* Add test case for scan testsuite */
         scanTestCaseList = new ArrayList<TestCase>();
@@ -547,8 +823,8 @@ public class MainActivity extends Activity {
         for (int testCase = 0; testCase < arrMediaTest.length; testCase++) {
             mediaTestCaseList.add(new TestCase(arrMediaTest[testCase]));
         }
-        mediaTestAdaper = new TestCaseAdapter(this, mediaTestCaseList);
-        lvMediaTest.setAdapter(mediaTestAdaper);
+        mediaTestAdapter = new TestCaseAdapter(this, mediaTestCaseList);
+        lvMediaTest.setAdapter(mediaTestAdapter);
 
         /* Add test case for media event listener testsuite */
         mediaEventListenerTestCaseList = new ArrayList<TestCase>();
@@ -558,13 +834,21 @@ public class MainActivity extends Activity {
         mediaEventListenerTestAdapter = new TestCaseAdapter(this, mediaEventListenerTestCaseList);
         lvMediaEventListenerTest.setAdapter(mediaEventListenerTestAdapter);
 
-        /* Add test case for SF testsuite */
-        sfTestCaseList = new ArrayList<TestCase>();
-        for (int testCase = 0; testCase < arrSFTest.length; testCase++) {
-            sfTestCaseList.add(new TestCase(arrSFTest[testCase]));
+        /* Add test case for SF Event testsuite */
+        sfEventTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrSFEventTest.length; testCase++) {
+            sfEventTestCaseList.add(new TestCase(arrSFEventTest[testCase]));
         }
-        sfTestAdapter = new TestCaseAdapter(this, sfTestCaseList);
-        lvSFTest.setAdapter(sfTestAdapter);
+        sfEventTestAdapter = new TestCaseAdapter(this, sfEventTestCaseList);
+        lvSFEventTest.setAdapter(sfEventTestAdapter);
+
+        /* Add test case for SF Exception testsuite */
+        sfExceptionTestCaseList = new ArrayList<TestCase>();
+        for (int testCase = 0; testCase < arrSFExceptionTest.length; testCase++) {
+            sfExceptionTestCaseList.add(new TestCase(arrSFExceptionTest[testCase]));
+        }
+        sfExceptionTestAdapter = new TestCaseAdapter(this, sfExceptionTestCaseList);
+        lvSFExceptionTest.setAdapter(sfExceptionTestAdapter);
 
         // Add Top Button
         btnTestAll = findViewById(R.id.btn_test_all);
@@ -577,7 +861,10 @@ public class MainActivity extends Activity {
         btnAllDvrTest = findViewById(R.id.btn_all_dvr_test);
         btnAllEpgTest = findViewById(R.id.btn_all_epg_test);
         btnAllMediaTest = findViewById(R.id.btn_all_media_test);
+        btnAllMediaEventListenerTest = findViewById(R.id.all_media_event_listener_button);
         btnAllSfTest = findViewById(R.id.btn_all_sf_test);
+        btnSFEventTest = findViewById(R.id.btn_sf_event_test);
+        btnSFExceptionTest = findViewById(R.id.btn_sf_exception_test);
     }
 
     public static class ListUtils {
@@ -622,11 +909,11 @@ public class MainActivity extends Activity {
                     }
                 });
                 switch (position) {
-                    case ScanTest.NOTTITY:
+                    case ScanTest.NOTIFY:
                         ret = ScanTest.getInstance().SCA_Notify();
                         break;
                     case ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH:
-                        ret = ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+                        ret = ScanTest.getInstance().SCA_NotifyScanSaveResultFinished();
                         break;
                     case ScanTest.SELECT_CONFLICT_CHANNEL_REGION:
                         ret = ScanTest.getInstance().SCA_SelectConflictedChannelRegion();
@@ -745,7 +1032,11 @@ public class MainActivity extends Activity {
                 });
             }
         });
-        Toast.makeText(getApplicationContext(), "Testcase " + arrDVRTest[position], Toast.LENGTH_LONG).show();
+        if (position == DVRTest.RECORDING_SESSION_CALLBACK) {
+            Toast.makeText(getApplicationContext(), "Testcase " + arrDVRTest[position] + " recording in: " + DVRTest.timeChecking + "s", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Testcase " + arrDVRTest[position], Toast.LENGTH_LONG).show();
+        }
 
         dvrTestCaseList.get(position).setStatus(TestCase.NOT_TEST);
         runOnUiThread(new Runnable() {
@@ -757,7 +1048,7 @@ public class MainActivity extends Activity {
         threadScan.start();
     }
 
-    public void testMediaListener(final int position) {
+    public void testMedia(final int position) {
         Intent intent;
         switch (position) {
             case MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE:
@@ -765,103 +1056,120 @@ public class MainActivity extends Activity {
                 startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE_REQUEST_CODE);
                 break;
             case MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR:
-                intent = new Intent(getBaseContext(), ChannelPlayerTVStreamTSRTestActivity.class);
-                startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE);
-                break;
-            case MediaTest.CHANNEL_EVENT_LISTENER:
-                if (threadMediaTest != null) {
-                    if (threadMediaTest.isAlive()) {
-                        Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                }
-
-                threadMediaTest = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int ret = TestCase.FAIL;
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.NOT_TEST);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaTestAdaper.notifyDataSetChanged();
-                            }
-                        });
-
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_RUNNING);
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaTestAdaper.notifyDataSetChanged();
-                            }
-                        });
-                        ret = ChannelEventListener.getInstance(getBaseContext()).onChannelEvent();
-
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setResult(ret);
-                        mediaTestCaseList.get(MediaTest.CHANNEL_EVENT_LISTENER).setStatus(TestCase.TEST_DONE);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaTestAdaper.notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
-                threadMediaTest.start();
+//                intent = new Intent(getBaseContext(), ChannelPlayerTVStreamTSRTestActivity.class);
+//                startActivityForResult(intent, MediaTest.CHANNEL_PLAYER_TVSTREAM_TSR_REQUEST_CODE);
                 break;
             default:
         }
+
+        if (position == MediaTest.CHANNEL_EVENT_LISTENER  || position == MediaTest.CAPTION_CONTROLLER_EVENT_LISTENER_ON_DETACH) {
+            if (threadMediaTest != null) {
+                if (threadMediaTest.isAlive()) {
+                    Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
+            threadMediaTest = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int ret = TestCase.FAIL;
+
+                    mediaTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mediaTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+                    if (position == MediaTest.CHANNEL_EVENT_LISTENER) {
+                        ret = ChannelEventListenerTest.getInstance(getBaseContext()).onChannelEvent();
+                    } else if (position == MediaTest.CAPTION_CONTROLLER_EVENT_LISTENER_ON_DETACH) {
+                        ret = MediaTest.getInstance().captionControllerEventListenerOnDetach();
+                    }
+
+
+                    mediaTestCaseList.get(position).setResult(ret);
+                    mediaTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mediaTestAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            });
+            threadMediaTest.start();
+        }
     }
 
-    public void testSfEventListener(final int position) {
-        if (threadScan != null) {
-            if (threadScan.isAlive()) {
+    public void testMediaEventListener(final int position) {
+        if (threadMediaEventListenerTest != null) {
+            if (threadMediaEventListenerTest.isAlive()) {
                 Toast.makeText(getApplicationContext(), "Wait for current test case finish", Toast.LENGTH_LONG).show();
                 return;
             }
         }
 
-        threadScan = new Thread(new Runnable() {
+        threadMediaEventListenerTest = new Thread(new Runnable() {
             @Override
             public void run() {
-                ret = TestCase.FAIL;
-                sfTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
+                int ret = TestCase.FAIL;
+
+                mediaEventListenerTestCaseList.get(position).setStatus(TestCase.TEST_RUNNING);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        sfTestAdapter.notifyDataSetChanged();
+                        mediaEventListenerTestAdapter.notifyDataSetChanged();
                     }
                 });
+
                 switch (position) {
-                    case SectionFilterTest.SF_EXCEPTION:
+                    case MediaEventListenerTest.ON_BEGINNING:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onBeginingTest();
                         break;
-                    case SectionFilterTest.SF_EVENT:
-                        ret = SectionFilterTest.getInstance().sectionFitlerEvent();
+                    case MediaEventListenerTest.ON_COMPLETION:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onCompletion();
+                        break;
+                    case MediaEventListenerTest.ON_ERROR:
+                        try {
+                            ret = MediaEventListenerTest.getInstance(getBaseContext()).onError();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case MediaEventListenerTest.ON_PREPARED:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onPrepared();
+                        break;
+                    case MediaEventListenerTest.ON_RATED_CHANGE:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onRateChanged();
+                        break;
+                    case MediaEventListenerTest.ON_STOPPED:
+                        ret = MediaEventListenerTest.getInstance(getBaseContext()).onStopped();
                         break;
                     default:
                 }
-
-                sfTestCaseList.get(position).setResult(ret);
-                sfTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
+                mediaEventListenerTestCaseList.get(position).setResult(ret);
+                mediaEventListenerTestCaseList.get(position).setStatus(TestCase.TEST_DONE);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        sfTestAdapter.notifyDataSetChanged();
+                        mediaEventListenerTestAdapter.notifyDataSetChanged();
                     }
                 });
-            }
-        });
-        Toast.makeText(getApplicationContext(), "Testcase " + arrSFTest[position], Toast.LENGTH_SHORT).show();
 
-        sfTestCaseList.get(position).setStatus(TestCase.NOT_TEST);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sfTestAdapter.notifyDataSetChanged();
             }
         });
-        threadScan.start();
+
+        threadMediaEventListenerTest.start();
+
+    }
+
+    public void testSfEventListener(final int position) {
+    }
+
+    public void testSfExceptionListener(final int position) {
     }
 
     @Override
@@ -872,8 +1180,140 @@ public class MainActivity extends Activity {
 
             mediaTestCaseList.get(MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE).setResult(result);
             mediaTestCaseList.get(MediaTest.CHANNEL_PLAYER_TVSTREAM_LIVE).setStatus(TestCase.TEST_DONE);
-            mediaTestAdaper.notifyDataSetChanged();
+            mediaTestAdapter.notifyDataSetChanged();
 
+        }
+    }
+
+    private void exportTestResults() {
+        int numOfPassTC = 0;
+        int numOfFailTC = 0;
+        File resultXmlFile = new File("/storage/emulated/0/androidtvtest.xml");
+
+        if (!resultXmlFile.exists()) {
+            try {
+                resultXmlFile.createNewFile();
+            } catch (IOException e) {
+                TLog.e(this, "Can not create " + resultXmlFile.getPath());
+                e.printStackTrace();
+            }
+        }
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(resultXmlFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        XmlSerializer xmlSerializer = Xml.newSerializer();
+
+        try {
+            xmlSerializer.setOutput(fileOutputStream, "UTF-8");
+            xmlSerializer.startDocument(null, false);
+            xmlSerializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            xmlSerializer.processingInstruction("xml-stylesheet type=\"text/xsl\" href=\"compatibility_result.xsl\"");
+            xmlSerializer.startTag(null, "Result");
+            xmlSerializer.attribute(null, "suite_name", "TCTS_VERIFIER");
+            xmlSerializer.attribute(null, "report_version", "1.0");
+
+            xmlSerializer.startTag(null, "Build");
+            xmlSerializer.attribute(null, "build_device", "hgs1000s");
+            xmlSerializer.endTag(null, "Build");
+
+            xmlSerializer.startTag(null, "Module");
+            xmlSerializer.attribute(null, "name", "TCTSVerifier");
+
+            xmlSerializer.startTag(null, "TestCase");
+
+            if (listTestedTC != null) {
+                for (int i = 0; i < listTestedTC.size(); i++) {
+                    ShowResultActivity tc = listTestedTC.get(i);
+                    if (tc.isSuccessTestCase()) {
+                        numOfPassTC++;
+                    } else {
+                        numOfFailTC++;
+                    }
+                    xmlSerializer.startTag(null, "Test");
+                    xmlSerializer.attribute(null, "result",
+                            tc.isSuccessTestCase() ? "pass" : "fail");
+                    xmlSerializer.attribute(null, "name", tc.getName());
+                    xmlSerializer.endTag(null, "Test");
+                }
+            }
+
+            xmlSerializer.endTag(null, "TestCase");
+
+            xmlSerializer.endTag(null, "Module");
+
+            xmlSerializer.startTag(null, "Summary");
+            xmlSerializer.attribute(null, "pass", String.valueOf(numOfPassTC));
+            xmlSerializer.attribute(null, "fail", String.valueOf(numOfFailTC));
+            xmlSerializer.endTag(null, "Summary");
+
+            xmlSerializer.endTag(null, "Result");
+            xmlSerializer.endDocument();
+            xmlSerializer.flush();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            TLog.e(this, e.toString());
+        }
+
+        try {
+            File result_zip_file = new File("/storage/emulated/0/test_result.zip"); //TODO Add date time in filename
+            FileOutputStream fos = new FileOutputStream(result_zip_file);
+            ZipOutputStream zos = new ZipOutputStream(fos);
+
+            /* Firstly, zip xml file */
+            InputStream fisResultXml = new FileInputStream(resultXmlFile);
+            zipFile(fisResultXml, "androidtvtest.xml", zos);
+            fisResultXml.close();
+            /* Secondly, zip logo.png */
+            @SuppressLint("ResourceType")
+            InputStream isLogoPng = getResources().openRawResource(R.drawable.logo);
+            zipFile(isLogoPng, "logo.png", zos);
+            isLogoPng.close();
+
+                /* Thirdly, zip css file */
+            InputStream isCssFile = getAssets().open("compatibility_result.css");
+            zipFile(isCssFile, "compatibility_result.css", zos);
+            isCssFile.close();
+
+                /* Fourthly, zip xsd file */
+            InputStream isXsdFile = getAssets().open("compatibility_result.xsd");
+            zipFile(isXsdFile, "compatibility_result.xsd", zos);
+            isXsdFile.close();
+
+                /* Fifthly, zip xsl file */
+            InputStream isXslFile = getAssets().open("compatibility_result.xsl");
+            zipFile(isXslFile, "compatibility_result.xsl", zos);
+            isXslFile.close();
+
+            zos.closeEntry();
+            zos.close();
+            fos.close();
+            resultXmlFile.delete();
+
+            Toast.makeText(getApplicationContext(), "Result saved in " + result_zip_file.getPath(),
+                    Toast.LENGTH_SHORT).show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void zipFile(InputStream inputStream, String file_name, ZipOutputStream zos) {
+        byte buf[] = new byte[1024];
+        int len;
+        ZipEntry ze = new ZipEntry(file_name);
+        try {
+            zos.putNextEntry(ze);
+            while ((len = inputStream.read(buf)) > 0) {
+                zos.write(buf, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

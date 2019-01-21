@@ -15,8 +15,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import af.channel.Channel;
@@ -32,6 +30,8 @@ import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.channelbuilder.ScanTest;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
+import alticast.com.cltestsuite.utils.Util;
+
 import com.alticast.af.dvr.RRecordingSessionCallback;
 
 public class DVRTest {
@@ -39,11 +39,11 @@ public class DVRTest {
     public static final int STATE_LISTENER_ON_STATED = 1;
     public static final int STATE_LISTENER_ON_STOPPED = 2;
     public static final int RECORDING_SESSION_CALLBACK = 3;
+    public static int timeChecking = 30;
 
     private Channel[] channels;
     private Channel currentChannel;
     private RecordingSession recordingSession;
-    private int timeChecking;
     private static boolean isTunedSuccess, isRecordingStopped, isRecordingStarted, isRightTime;
     private Recording record;
     private static DVRTest instance = null;
@@ -93,7 +93,7 @@ public class DVRTest {
         devices = null;
 
         //add device rootpath
-        List<String> list = new ArrayList<String>();
+//        List<String> list = new ArrayList<String>();
         BufferedReader buf_reader = null;
         try {
             buf_reader = new BufferedReader(new FileReader("/proc/mounts"));
@@ -135,7 +135,7 @@ public class DVRTest {
             }
         }
 
-        /* Delay few miliseconds for save result*/
+        /* Delay few milliseconds for save result*/
         try {
             TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
@@ -150,7 +150,7 @@ public class DVRTest {
     public int stateListenerOnStopped() {
         recordingManager.getInstance().stop();
 
-        /* Delay few miliseconds for save result*/
+        /* Delay few milliseconds for save result*/
         try {
             TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
@@ -166,9 +166,8 @@ public class DVRTest {
         isRecordingStopped = false;
         isRecordingStarted = false;
         isRightTime = false;
-        timeChecking = 30;
 
-        ScanTest.getInstance().SCA_NofifyScanSaveResultFinished();
+        ScanTest.getInstance().SCA_NotifyScanSaveResultFinished();
         stateListenerOnStated();
 
         RecordingManager.getInstance().start(devices + "/");
@@ -178,7 +177,7 @@ public class DVRTest {
         }
 
         if (channels.length > 0) {
-            currentChannel = channels[0];
+            currentChannel = channels[Util.getTestChannelNumber()];
             if (RecordingManager.getInstance().getStoragePath() != null) {
                 RecordingManager.getInstance().start("");
 

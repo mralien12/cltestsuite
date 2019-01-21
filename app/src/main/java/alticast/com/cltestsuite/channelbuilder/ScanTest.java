@@ -15,6 +15,7 @@ import com.alticast.af.builder.RAntennaInfoDiseqc;
 import com.alticast.af.builder.RAntennaInfoLnb;
 import com.alticast.af.builder.RScanConflictRegion;
 import com.alticast.af.builder.RScanEventObject;
+import com.alticast.af.builder.RScanManager;
 import com.alticast.af.builder.RScanParam;
 import com.alticast.af.builder.RTuneParamSat;
 import com.alticast.af.builder.RTuneTpInfoSat;
@@ -30,21 +31,23 @@ import af.channel.ChannelManager;
 import alticast.com.cltestsuite.MainActivity;
 import alticast.com.cltestsuite.utils.TLog;
 import alticast.com.cltestsuite.utils.TestCase;
+import alticast.com.cltestsuite.utils.Util;
 
 public class ScanTest {
     /*
      * Define final variables corresponding to list of test case in values/strings.xml
      */
-    public static final int NOTTITY = 0;
+    public static final int NOTIFY = 0;
     public static final int NOTIFY_SCAN_SAVE_RESULT_FINISH = 1;
     public static final int SELECT_CONFLICT_CHANNEL_REGION = 2;
 
     private static final int SCAN_TIMEOUT = 30;     /* seconds */
-    private static final String SAT_NAME = "ASTRA_1";
-    private static final int LNB_FREQ = 9750;
-    private static final int FREQ = 11362;
-    private static final int SYMBOL_RATE = 22000;
-    private static final int POLARIZATION = 1;
+
+    private static int uid;
+    private static String satName = "";
+    private static int lnbFreq;
+    private static int freq;
+    private static int symbolRate;
 
     private static ScanTest instance;
     private static RScanParam rScanParam;
@@ -65,19 +68,40 @@ public class ScanTest {
     }
 
     private static void setUp() {
+        String projectName = Util.getProjectName();
+        if(projectName == "kbro") {
+            uid = 1;
+            lnbFreq = 10750;
+            freq = 11900;
+            symbolRate = 21300;
+        } else {    // Default project is reference STB: HGS1000S
+            uid = RScanManager.UID_NOT_DEFINED;
+            satName = "ASTRA_1";
+            lnbFreq = 9750;
+            freq = 11362;
+            symbolRate = 22000;
+        }
+
         // Generate rScanParam
-        List<RTuneParamSat> item = new ArrayList();
+        List<RTuneParamSat> tuneParam = new ArrayList();
 
-        RAntennaInfoLnb rAntennaInfoLnb = new RAntennaInfoLnb(-1, SAT_NAME, LNB_FREQ, 0);
-        RAntennaInfoDiseqc diseqc = new RAntennaInfoDiseqc(-1, SAT_NAME, 0, 0, 0, 1, 1);
-        List<RTuneTpInfoSat> tpList = new ArrayList();
-        RTuneTpInfoSat rTuneTpInfoSat = new RTuneTpInfoSat(FREQ, SYMBOL_RATE, POLARIZATION, 1, 1, 2, 0);
-        tpList.add(rTuneTpInfoSat);
+        RAntennaInfoLnb antInfo = new RAntennaInfoLnb(uid, satName, lnbFreq, RScanManager.LNB_VOLT_STD);
+        RAntennaInfoDiseqc antDiseqc = new RAntennaInfoDiseqc(uid, satName, 0,
+                RScanManager.LNB_VOLT_STD, RScanManager.SAT_22KTONE_AUTO,
+                RScanManager.SAT_DISEQC_VER_1_0, RScanManager.SAT_DISEQC_INPUT_A);
+        List<RTuneTpInfoSat> tuneTpList = new ArrayList();
+        RTuneTpInfoSat rTuneTpInfoSat = new RTuneTpInfoSat(freq, symbolRate,
+                RScanManager.SAT_POLAR_HOR, RScanManager.SAT_PSK_8PSK, RScanManager.SAT_TRANS_DVBS2,
+                RScanManager.SAT_PILOT_AUTO, RScanManager.SAT_CODERATE_2_3);
+        tuneTpList.add(rTuneTpInfoSat);
 
-        RTuneParamSat rTuneParamSat = new RTuneParamSat(0, rAntennaInfoLnb, diseqc, tpList);
-        item.add(rTuneParamSat);
+        RTuneParamSat rTuneParamSat = new RTuneParamSat(RScanManager.SAT_ANT_TYPE_LNB_ONLY,
+                antInfo, antDiseqc, tuneTpList);
+        tuneParam.add(rTuneParamSat);
 
-        rScanParam = new RScanParam(item, 1, 1, false, 0);
+        rScanParam = new RScanParam(tuneParam, null, null, RScanManager.SVC_SCAN_TYPE_AUTO,
+                RScanManager.SVC_TYPE_TV, RScanManager.CAS_TYPE_FTA,
+                false, 0, RScanManager.DELIVERY_TYPE_SAT);
     }
 
     /*
@@ -107,7 +131,7 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().startScan(rScanParam)) {
             TLog.e(this, "SCA_Notify: Failed to start scan");
-            MainActivity.scanTestCaseList.get(ScanTest.NOTTITY).
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY).
                     setFailedReason("Failed to start scan");
             return TestCase.FAIL;
         }
@@ -121,14 +145,14 @@ public class ScanTest {
 
         if (!ScanManager.getInstance().stopScan()) {
             TLog.e(this, "SCA_Notify: Failed to stop scan");
-            MainActivity.scanTestCaseList.get(ScanTest.NOTTITY).
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY).
                     setFailedReason("Failed to stop scan");
             return TestCase.FAIL;
         }
 
         if (ret == TestCase.FAIL) {
             TLog.e(this, "SCA_Notify: Failed");
-            MainActivity.scanTestCaseList.get(ScanTest.NOTTITY).
+            MainActivity.scanTestCaseList.get(ScanTest.NOTIFY).
                     setFailedReason("Notify callback is not invoked");
         }
 
@@ -140,7 +164,7 @@ public class ScanTest {
     * A. Try to start scan.
     * B. Get the notification after calling the Notify. And Could get a channel list.
     */
-    public int SCA_NofifyScanSaveResultFinished() {
+    public int SCA_NotifyScanSaveResultFinished() {
         ret = TestCase.FAIL;
         ScanManager.getInstance().setEventListener(new ScanEventListener() {
             @Override
@@ -150,7 +174,7 @@ public class ScanTest {
 
             @Override
             public void notifyScanSaveResultFinished() {
-                TLog.i(this, "SCA_NofifyScanSaveResultFinished: Notify Event");
+                TLog.i(this, "SCA_NotifyScanSaveResultFinished: Notify Event");
                 ret = TestCase.SUCCESS;
             }
 
@@ -161,7 +185,7 @@ public class ScanTest {
         });
 
         if (!ScanManager.getInstance().startScan(rScanParam)) {
-            TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to start scan");
+            TLog.e(this, "SCA_NotifyScanSaveResultFinished: Failed to start scan");
             MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
                     setFailedReason("Failed to start scan");
             return TestCase.FAIL;
@@ -175,7 +199,7 @@ public class ScanTest {
         }
 
         if (!ScanManager.getInstance().saveResult()) {
-            TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to save result");
+            TLog.e(this, "SCA_NotifyScanSaveResultFinished: Failed to save result");
             MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
                     setFailedReason("Failed to save scan result after finishing scan");
             return TestCase.FAIL;
@@ -183,20 +207,20 @@ public class ScanTest {
 
         /* Delay few miliseconds for save result notify callback */
         try {
-            TimeUnit.MILLISECONDS.sleep(100);
+            TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         if (!ScanManager.getInstance().stopScan()) {
-            TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed to stop scan");
+            TLog.e(this, "SCA_NotifyScanSaveResultFinished: Failed to stop scan");
             MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
                     setFailedReason("Failed to stop scan");
             return TestCase.FAIL;
         }
 
         if (ret == TestCase.FAIL) {
-            TLog.e(this, "SCA_NofifyScanSaveResultFinished: Failed");
+            TLog.e(this, "SCA_NotifyScanSaveResultFinished: Failed");
             MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
                     setFailedReason("notifyScanSaveResultFinished callback is not invoked");
             return TestCase.FAIL;
@@ -204,7 +228,7 @@ public class ScanTest {
 
         Channel[] channels = ChannelManager.getInstance().getChannelList(ChannelManager.CHANNEL_LIST_ALL);
         if (channels.length <= 0) {
-            TLog.e(this, "SCA_NofifyScanSaveResultFinished: Channel list is empty");
+            TLog.e(this, "SCA_NotifyScanSaveResultFinished: Channel list is empty");
             MainActivity.scanTestCaseList.get(ScanTest.NOTIFY_SCAN_SAVE_RESULT_FINISH).
                     setFailedReason("Channel list is empty");
             return TestCase.FAIL;
